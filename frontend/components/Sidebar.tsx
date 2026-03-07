@@ -13,6 +13,7 @@ const navItems = [
   { href: '/send', label: 'Send Message', icon: '💬' },
   { href: '/blast', label: 'Blast', icon: '📢' },
   { href: '/auto-responder', label: 'Auto-Responder', icon: '🤖' },
+  { href: '/chat', label: 'Live Chat', icon: '💬' },
   { href: '/webhooks', label: 'Webhooks', icon: '🔗' },
   { href: '/billing', label: 'Billing', icon: '💳' },
   { href: '/logs', label: 'Message Logs', icon: '📋' },

@@ -15,6 +15,7 @@ import { contactRoutes } from './routes/contact.routes';
 import { autoResponderRoutes } from './routes/autoResponder.routes';
 import webhookRoutes from './routes/webhook.routes';
 import { billingRoutes } from './routes/billing.routes';
+import { chatRoutes } from './routes/chat.routes';
 import { wsServer } from './websocket/wsServer';
 import { sessionManager } from './baileys/sessionManager';
 import { prisma } from './config/prisma';
@@ -66,6 +67,7 @@ async function buildServer() {
     fastify.register(autoResponderRoutes, { prefix: '/auto-responder' });
     fastify.register(webhookRoutes, { prefix: '/webhooks' });
     fastify.register(billingRoutes, { prefix: '/billing' });
+    fastify.register(chatRoutes, { prefix: '/chats' });
 
     // ── Error handler ─────────────────────────────────────────
     fastify.setErrorHandler(errorHandler);

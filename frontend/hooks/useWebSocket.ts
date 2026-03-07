@@ -45,6 +45,12 @@ export function useWebSocket(userId?: string) {
                             new CustomEvent('blast_progress', { detail: msg.data })
                         );
                         break;
+
+                    case 'new_message':
+                        window.dispatchEvent(
+                            new CustomEvent('new_message', { detail: msg.data })
+                        );
+                        break;
                 }
             } catch { }
         };

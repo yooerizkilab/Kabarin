@@ -145,16 +145,19 @@ model Template {
 // MESSAGES (single sends)
 // ─────────────────────────────────────────────────────────
 model Message {
-  id        String        @id @default(uuid())
-  deviceId  String        @map("device_id")
-  to        String
-  type      MessageType   @default(TEXT)
-  content   String        @db.Text
-  mediaUrl  String?       @map("media_url")
-  status    MessageStatus @default(PENDING)
-  sentAt    DateTime?     @map("sent_at")
-  createdAt DateTime      @default(now()) @map("created_at")
-  updatedAt DateTime      @updatedAt @map("updated_at")
+  id         String           @id @default(uuid())
+  deviceId   String           @map("device_id")
+  from       String?          // phone number of sender (for incoming)
+  to         String           // phone number of recipient (for outgoing)
+  direction  MessageDirection @default(OUTGOING)
+  externalId String?          @unique @map("external_id") // ID from WhatsApp
+  type       MessageType      @default(TEXT)
+  content    String           @db.Text
+  mediaUrl   String?          @map("media_url")
+  status     MessageStatus    @default(PENDING)
+  sentAt     DateTime?        @map("sent_at")
+  createdAt  DateTime         @default(now()) @map("created_at")
+  updatedAt  DateTime         @updatedAt @map("updated_at")
 
   device Device       @relation(fields: [deviceId], references: [id], onDelete: Cascade)
   logs   MessageLog[]
@@ -162,7 +165,13 @@ model Message {
   @@index([deviceId])
   @@index([status])
   @@index([to])
+  @@index([from])
   @@map("messages")
+}
+
+enum MessageDirection {
+  INCOMING
+  OUTGOING
 }
 
 enum MessageType {

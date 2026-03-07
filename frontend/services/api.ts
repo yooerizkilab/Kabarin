@@ -50,6 +50,13 @@ export const messageAPI = {
         api.get('/messages/logs', { params }),
 };
 
+// ── Chats ─────────────────────────────────────────────────
+export const chatAPI = {
+    getList: (deviceId: string) => api.get(`/chats?deviceId=${deviceId}`),
+    getHistory: (deviceId: string, phone: string) =>
+        api.get(`/chats/history?deviceId=${deviceId}&phone=${phone}`),
+};
+
 // ── Blast ─────────────────────────────────────────────────
 export const blastAPI = {
     create: (data: {

@@ -8,7 +8,7 @@ Project ini dibangun dengan arsitektur skalabel sehingga sangat mudah untuk dike
    Kemampuan meneruskan (_forward_) pesan yang masuk (Incoming Messages) ke server/aplikasi milik pengguna pihak ketiga secara _Real-time_.
 3. ~~**💳 SaaS Billing & Tiering Quota**~~ (✅ Selesai)
    Integrasi payment gateway (Midtrans/Stripe) beserta kuota pesan bulanan per user untuk memonetisasi platform secara B2B.
-4. **💬 Shared Team Inbox (Live Chat CS)**
+4. ~~**💬 Shared Team Inbox (Live Chat CS)**~~ (✅ Selesai)
    UI khusus mirip WhatsApp Web yang memungkinkan Multi-Customer Service milik _User_ membalas chat secara manual dari satu nomor yang sama.
 5. **🚀 Migrasi Queue ke Redis (BullMQ)**
    Mengganti sistem _Database-Queue_ bawaan saat ini dengan **Redis** Worker agar bisa diskalakan secara horizontal (menjalankan banyak instance Worker sekaligus).

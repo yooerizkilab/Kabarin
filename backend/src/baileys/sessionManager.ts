@@ -16,6 +16,7 @@ import { autoResponderRepository } from '../repositories/autoResponderRepository
 import { callAI } from '../services/aiService';
 import { webhookRepository } from '../repositories/webhookRepository';
 import { webhookService } from '../services/webhookService';
+import { messageRepository } from '../repositories/messageRepository';
 
 export interface DeviceSession {
     socket: WASocket;
@@ -141,11 +142,32 @@ class SessionManager {
 
                     console.log(`[WhatsApp] Incoming message to ${deviceId} from ${from}: "${text}"`);
 
-                    // Broadcast incoming message to frontend
+                    // Persist to Database
+                    try {
+                        await messageRepository.upsertIncoming({
+                            deviceId,
+                            from,
+                            to: socket.user?.id || '', // Our own number/ID if known
+                            externalId: msg.key.id || '',
+                            type: 'TEXT',
+                            content: text,
+                            status: 'READ',
+                        });
+                    } catch (err: any) {
+                        console.error(`[Inbox] Error saving incoming message:`, err.message);
+                    }
+
+                    // Broadcast incoming message to frontend (Legacy + Sync)
                     wsServer.sendToDevice(deviceId, 'incoming_message', {
                         deviceId,
                         from,
                         text,
+                    });
+                    wsServer.sendToDevice(deviceId, 'new_message', {
+                        deviceId,
+                        from,
+                        text,
+                        direction: 'INCOMING'
                     });
 
                     // Tangani Webhook
