@@ -132,3 +132,10 @@ export const webhookAPI = {
         api.put(`/webhooks/${id}`, data),
     delete: (id: string) => api.delete(`/webhooks/${id}`),
 };
+
+// ── Billing & Subscription ──────────────────────────────────
+export const billingAPI = {
+    getPlans: () => api.get('/billing/plans'),
+    checkout: (planId: string) => api.post('/billing/checkout', { planId }),
+    getMe: () => api.get('/billing/me'),
+};

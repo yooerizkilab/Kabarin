@@ -255,6 +255,17 @@ class SessionManager {
             const autoResponder = await autoResponderRepository.findActiveByDeviceId(deviceId);
             if (!autoResponder) return;
 
+            // ── Quota Check ─────────────────────────────────────
+            const user: any = autoResponder.user;
+            const maxMessages = user.subscriptionStatus === 'ACTIVE' && user.subscriptionPlan
+                ? user.subscriptionPlan.maxMessagesPerMonth
+                : 100; // Default Free Tier
+
+            if (user.messagesSentThisMonth >= maxMessages) {
+                console.log(`[AutoResponder] Quota exceeded for user ${user.id}. Skipping reply.`);
+                return;
+            }
+
             const normalizedText = text.trim().toLowerCase();
             let replied = false;
 
@@ -284,6 +295,12 @@ class SessionManager {
                     await this.sendTextMessage(deviceId, from, rule.response);
                     console.log(`[AutoResponder] Keyword match (${matchType}): "${text}" → rule ${rule.id}`);
                     replied = true;
+
+                    // Increment Quota
+                    await prisma.user.update({
+                        where: { id: user.id },
+                        data: { messagesSentThisMonth: { increment: 1 } }
+                    });
                     break;
                 }
             }
@@ -298,6 +315,12 @@ class SessionManager {
                 );
                 await this.sendTextMessage(deviceId, from, aiReply);
                 console.log(`[AutoResponder] AI (${autoResponder.aiProvider}) replied to: "${text}"`);
+
+                // Increment Quota
+                await prisma.user.update({
+                    where: { id: user.id },
+                    data: { messagesSentThisMonth: { increment: 1 } }
+                });
             }
         } catch (err: any) {
             console.error(`[AutoResponder] Error handling auto-respond for device ${deviceId}:`, err.message);

@@ -19,19 +19,31 @@ model User {
   password  String
   name      String
   role      Role     @default(USER)
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  subscriptionPlanId    String?              @map("subscription_plan_id")
+  subscriptionStatus    SubscriptionStatus   @default(EXPIRED) @map("subscription_status")
+  subscriptionEndDate   DateTime?            @map("subscription_end_date")
+  messagesSentThisMonth Int                  @default(0) @map("messages_sent_this_month")
+  createdAt             DateTime             @default(now()) @map("created_at")
+  updatedAt             DateTime             @updatedAt @map("updated_at")
 
-  devices        Device[]
-  contacts       Contact[]
-  contactGroups  ContactGroup[]
-  templates      Template[]
-  blastJobs      BlastJob[]
-  autoResponders AutoResponder[]
-  webhooks       Webhook[]
+  devices             Device[]
+  contacts            Contact[]
+  contactGroups       ContactGroup[]
+  templates           Template[]
+  blastJobs           BlastJob[]
+  autoResponders      AutoResponder[]
+  webhooks            Webhook[]
+  subscriptionPlan    SubscriptionPlan?    @relation(fields: [subscriptionPlanId], references: [id])
+  paymentTransactions PaymentTransaction[]
 
   @@index([email])
   @@map("users")
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  EXPIRED
+  CANCELED
 }
 
 enum Role {
@@ -309,4 +321,48 @@ model Webhook {
 
   @@index([userId])
   @@map("webhooks")
+}
+
+// ─────────────────────────────────────────────────────────
+// BILLING & SUBSCRIPTION
+// ─────────────────────────────────────────────────────────
+model SubscriptionPlan {
+  id                  String   @id @default(uuid())
+  name                String
+  price               Int
+  maxDevices          Int      @map("max_devices")
+  maxMessagesPerMonth Int      @map("max_messages_per_month")
+  features            Json?    
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  users               User[]
+  transactions        PaymentTransaction[]
+
+  @@map("subscription_plans")
+}
+
+model PaymentTransaction {
+  id                 String        @id @default(uuid())
+  userId             String        @map("user_id")
+  planId             String        @map("plan_id")
+  amount             Int
+  status             PaymentStatus @default(PENDING)
+  paymentGatewayUrl  String?       @db.Text @map("payment_gateway_url")
+  paymentToken       String?       @map("payment_token")
+  createdAt          DateTime      @default(now()) @map("created_at")
+  updatedAt          DateTime      @updatedAt @map("updated_at")
+
+  user               User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan               SubscriptionPlan @relation(fields: [planId], references: [id], onDelete: Restrict)
+
+  @@index([userId])
+  @@index([planId])
+  @@map("payment_transactions")
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
 }

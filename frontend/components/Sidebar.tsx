@@ -14,6 +14,7 @@ const navItems = [
   { href: '/blast', label: 'Blast', icon: '📢' },
   { href: '/auto-responder', label: 'Auto-Responder', icon: '🤖' },
   { href: '/webhooks', label: 'Webhooks', icon: '🔗' },
+  { href: '/billing', label: 'Billing', icon: '💳' },
   { href: '/logs', label: 'Message Logs', icon: '📋' },
 ];
 

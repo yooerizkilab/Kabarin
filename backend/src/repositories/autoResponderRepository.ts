@@ -27,7 +27,10 @@ export const autoResponderRepository = {
     async findActiveByDeviceId(deviceId: string) {
         return prisma.autoResponder.findFirst({
             where: { deviceId, isActive: true },
-            include: { rules: { where: { isActive: true }, orderBy: { order: 'asc' } } },
+            include: {
+                rules: { where: { isActive: true }, orderBy: { order: 'asc' } },
+                user: { select: { id: true, messagesSentThisMonth: true, subscriptionStatus: true, subscriptionPlan: true } }
+            },
         });
     },
 

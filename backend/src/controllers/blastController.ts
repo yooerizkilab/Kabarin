@@ -2,6 +2,7 @@ import { FastifyRequest, FastifyReply } from 'fastify';
 import { blastRepository } from '../repositories/blastRepository';
 import { contactRepository } from '../repositories/contactRepository';
 import { resolveTemplate } from '../utils/csvParser';
+import { prisma } from '../config/prisma';
 
 export const blastController = {
     async create(request: FastifyRequest, reply: FastifyReply) {
@@ -47,6 +48,12 @@ export const blastController = {
         }));
 
         await blastRepository.createRecipients(recipients);
+
+        // Limit Quota Increment
+        await prisma.user.update({
+            where: { id: userId },
+            data: { messagesSentThisMonth: { increment: recipients.length } }
+        });
 
         return reply.status(201).send({
             success: true,

@@ -1,6 +1,7 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { messageRepository } from '../repositories/messageRepository';
 import { sessionManager } from '../baileys/sessionManager';
+import { prisma } from '../config/prisma';
 
 export const messageController = {
     async send(request: FastifyRequest, reply: FastifyReply) {
@@ -25,6 +26,13 @@ export const messageController = {
 
             await messageRepository.updateStatus(message.id, 'SENT', new Date());
             await messageRepository.addLog(message.id, 'sent');
+
+            // Increment kuota message user
+            const userId = (request.user as any).id;
+            await prisma.user.update({
+                where: { id: userId },
+                data: { messagesSentThisMonth: { increment: 1 } }
+            });
 
             return reply.send({ success: true, data: { ...message, status: 'SENT' } });
         } catch (err: any) {
