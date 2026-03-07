@@ -147,3 +147,17 @@ export const billingAPI = {
     checkout: (planId: string) => api.post('/billing/checkout', { planId }),
     getMe: () => api.get('/billing/me'),
 };
+
+// ── Admin Management ────────────────────────────────────────
+export const adminAPI = {
+    // Plans
+    getPlans: () => api.get('/admin/plans'),
+    createPlan: (data: any) => api.post('/admin/plans', data),
+    updatePlan: (id: string, data: any) => api.put(`/admin/plans/${id}`, data),
+    deletePlan: (id: string) => api.delete(`/admin/plans/${id}`),
+
+    // Users
+    listUsers: () => api.get('/admin/users'),
+    updateUserSubscription: (id: string, data: any) =>
+        api.put(`/admin/users/${id}/subscription`, data),
+};

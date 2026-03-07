@@ -67,6 +67,35 @@ export default function Sidebar() {
               </Link>
             );
           })}
+
+        {/* Admin Section */}
+        {user?.role === 'ADMIN' && (
+          <div className="pt-4 mt-4 border-t border-gray-800">
+            <p className="px-3 mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+              Management
+            </p>
+            {[
+              { href: '/admin/plans', label: 'Manage Plans', icon: '💎' },
+              { href: '/admin/users', label: 'Manage Users', icon: '👤' },
+            ].map((item) => {
+              const active = pathname === item.href || pathname.startsWith(item.href + '/');
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                    active
+                      ? 'bg-brand-600 text-white'
+                      : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                  }`}
+                >
+                  <span>{item.icon}</span>
+                  {item.label}
+                </Link>
+              );
+            })}
+          </div>
+        )}
       </nav>
 
       {/* User */}
