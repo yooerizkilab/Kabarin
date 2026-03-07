@@ -1,0 +1,247 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────────────────
+// USERS
+// ─────────────────────────────────────────────────────────
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      Role     @default(USER)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  devices       Device[]
+  contacts      Contact[]
+  contactGroups ContactGroup[]
+  templates     Template[]
+  blastJobs     BlastJob[]
+
+  @@index([email])
+  @@map("users")
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+// ─────────────────────────────────────────────────────────
+// DEVICES
+// ─────────────────────────────────────────────────────────
+model Device {
+  id          String       @id @default(uuid())
+  userId      String       @map("user_id")
+  name        String
+  phoneNumber String?      @map("phone_number")
+  status      DeviceStatus @default(DISCONNECTED)
+  sessionPath String?      @map("session_path")
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages  Message[]
+  blastJobs BlastJob[]
+
+  @@index([userId])
+  @@index([status])
+  @@map("devices")
+}
+
+enum DeviceStatus {
+  CONNECTED
+  DISCONNECTED
+  CONNECTING
+  QR_REQUIRED
+}
+
+// ─────────────────────────────────────────────────────────
+// CONTACT GROUPS
+// ─────────────────────────────────────────────────────────
+model ContactGroup {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  name      String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contacts Contact[]
+
+  @@index([userId])
+  @@map("contact_groups")
+}
+
+// ─────────────────────────────────────────────────────────
+// CONTACTS
+// ─────────────────────────────────────────────────────────
+model Contact {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  groupId   String?  @map("group_id")
+  name      String
+  phone     String
+  email     String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  group            ContactGroup?      @relation(fields: [groupId], references: [id])
+  blastRecipients  BlastRecipient[]
+
+  @@index([userId])
+  @@index([groupId])
+  @@index([phone])
+  @@map("contacts")
+}
+
+// ─────────────────────────────────────────────────────────
+// TEMPLATES
+// ─────────────────────────────────────────────────────────
+model Template {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  name      String
+  content   String   @db.Text
+  variables Json?    // e.g. ["name", "company"]
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  blastJobs BlastJob[]
+
+  @@index([userId])
+  @@map("templates")
+}
+
+// ─────────────────────────────────────────────────────────
+// MESSAGES (single sends)
+// ─────────────────────────────────────────────────────────
+model Message {
+  id        String        @id @default(uuid())
+  deviceId  String        @map("device_id")
+  to        String
+  type      MessageType   @default(TEXT)
+  content   String        @db.Text
+  mediaUrl  String?       @map("media_url")
+  status    MessageStatus @default(PENDING)
+  sentAt    DateTime?     @map("sent_at")
+  createdAt DateTime      @default(now()) @map("created_at")
+  updatedAt DateTime      @updatedAt @map("updated_at")
+
+  device Device       @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  logs   MessageLog[]
+
+  @@index([deviceId])
+  @@index([status])
+  @@index([to])
+  @@map("messages")
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  DOCUMENT
+}
+
+enum MessageStatus {
+  PENDING
+  SENT
+  DELIVERED
+  READ
+  FAILED
+}
+
+// ─────────────────────────────────────────────────────────
+// MESSAGE LOGS (delivery events)
+// ─────────────────────────────────────────────────────────
+model MessageLog {
+  id        String   @id @default(uuid())
+  messageId String   @map("message_id")
+  event     String   // sent, delivered, read, failed
+  data      Json?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@index([messageId])
+  @@map("message_logs")
+}
+
+// ─────────────────────────────────────────────────────────
+// BLAST JOBS
+// ─────────────────────────────────────────────────────────
+model BlastJob {
+  id          String      @id @default(uuid())
+  userId      String      @map("user_id")
+  deviceId    String      @map("device_id")
+  templateId  String?     @map("template_id")
+  name        String
+  message     String      @db.Text
+  status      BlastStatus @default(PENDING)
+  scheduledAt DateTime?   @map("scheduled_at")
+  startedAt   DateTime?   @map("started_at")
+  completedAt DateTime?   @map("completed_at")
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
+
+  user       User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  device     Device            @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  template   Template?         @relation(fields: [templateId], references: [id])
+  recipients BlastRecipient[]
+
+  @@index([userId])
+  @@index([deviceId])
+  @@index([status])
+  @@index([scheduledAt])
+  @@map("blast_jobs")
+}
+
+enum BlastStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  SCHEDULED
+}
+
+// ─────────────────────────────────────────────────────────
+// BLAST RECIPIENTS (queue rows)
+// ─────────────────────────────────────────────────────────
+model BlastRecipient {
+  id         String          @id @default(uuid())
+  blastJobId String          @map("blast_job_id")
+  contactId  String?         @map("contact_id")
+  phone      String
+  message    String          @db.Text  // resolved message (template replaced)
+  status     RecipientStatus @default(PENDING)
+  sentAt     DateTime?       @map("sent_at")
+  error      String?         @db.Text
+  createdAt  DateTime        @default(now()) @map("created_at")
+  updatedAt  DateTime        @updatedAt @map("updated_at")
+
+  blastJob BlastJob @relation(fields: [blastJobId], references: [id], onDelete: Cascade)
+  contact  Contact? @relation(fields: [contactId], references: [id])
+
+  @@index([blastJobId])
+  @@index([status])
+  @@index([phone])
+  @@map("blast_recipients")
+}
+
+enum RecipientStatus {
+  PENDING
+  SENT
+  FAILED
+}

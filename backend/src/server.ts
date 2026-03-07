@@ -1,0 +1,101 @@
+import 'dotenv/config';
+import Fastify from 'fastify';
+import cors from '@fastify/cors';
+import jwt from '@fastify/jwt';
+import multipart from '@fastify/multipart';
+import { env } from './config/env';
+import fastifyWebsocket from '@fastify/websocket';
+import { errorHandler } from './middlewares/errorHandler';
+import { authenticate } from './middlewares/auth';
+import { authRoutes } from './routes/auth.routes';
+import { deviceRoutes } from './routes/device.routes';
+import { messageRoutes } from './routes/message.routes';
+import { templateRoutes } from './routes/template.routes';
+import { contactRoutes } from './routes/contact.routes';
+import { wsServer } from './websocket/wsServer';
+import { sessionManager } from './baileys/sessionManager';
+import { prisma } from './config/prisma';
+
+async function buildServer() {
+    const fastify = Fastify({
+        logger: {
+            level: env.NODE_ENV === 'development' ? 'info' : 'warn',
+            transport:
+                env.NODE_ENV === 'development'
+                    ? { target: 'pino-pretty', options: { colorize: true } }
+                    : undefined,
+        },
+    });
+
+    // ── Plugins ──────────────────────────────────────────────
+    await fastify.register(cors, {
+        origin: [env.FRONTEND_URL],
+        credentials: true,
+    });
+
+    await fastify.register(jwt, { secret: env.JWT_SECRET });
+
+    await fastify.register(multipart, {
+        limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+    });
+
+    // Expose authenticate decorator
+    fastify.decorate('authenticate', authenticate);
+
+    // ── WebSocket Plugin ──────────────────────────────────────
+    await fastify.register(fastifyWebsocket);
+
+    fastify.register(async (fastify) => {
+        fastify.get('/ws', { websocket: true }, (connection: any) => {
+            wsServer.handleConnection(connection);
+        });
+    });
+
+    // ── Health ────────────────────────────────────────────────
+    fastify.get('/health', async () => ({ status: 'ok', timestamp: new Date().toISOString() }));
+
+    // ── Routes ───────────────────────────────────────────────
+    fastify.register(authRoutes, { prefix: '/auth' });
+    fastify.register(deviceRoutes, { prefix: '/devices' });
+    fastify.register(messageRoutes, { prefix: '/messages' });
+    fastify.register(templateRoutes, { prefix: '/templates' });
+    fastify.register(contactRoutes, { prefix: '/contacts' });
+
+    // ── Error handler ─────────────────────────────────────────
+    fastify.setErrorHandler(errorHandler);
+
+    return fastify;
+}
+
+async function start() {
+    const fastify = await buildServer();
+
+    try {
+        await fastify.listen({ port: env.PORT, host: env.HOST });
+
+        // ── WebSocket ──────────────────────────────────────────
+        fastify.log.info(`WebSocket server ready at /ws`);
+
+        // ── Restore active WhatsApp sessions ──────────────────
+        await sessionManager.restoreAllSessions();
+        fastify.log.info(`WhatsApp sessions restored`);
+
+        fastify.log.info(`Server running at http://${env.HOST}:${env.PORT}`);
+    } catch (err) {
+        fastify.log.error(err);
+        process.exit(1);
+    }
+
+    // ── Graceful shutdown ─────────────────────────────────────
+    const shutdown = async () => {
+        fastify.log.info('Shutting down gracefully...');
+        await prisma.$disconnect();
+        await fastify.close();
+        process.exit(0);
+    };
+
+    process.on('SIGTERM', shutdown);
+    process.on('SIGINT', shutdown);
+}
+
+start();

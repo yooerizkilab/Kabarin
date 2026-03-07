@@ -1,0 +1,45 @@
+# Dependency directories
+node_modules/
+/.pnp
+.pnp.js
+
+# Environment variables (Credentials & Config)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
+
+# WhatsApp Gateway Specific
+backend/sessions/
+frontend/.next/
+frontend/out/
+
+# Database / Prisma
+backend/prisma/*.db
+backend/prisma/*.db-journal
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS/Editor Files
+.DS_Store
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+thumbs.db
+
+# Build outputs
+dist/
+build/
+coverage/
