@@ -19,11 +19,11 @@ Project ini dibangun dengan arsitektur skalabel sehingga sangat mudah untuk dike
 7. ~~**👤 My Profile Management**~~ (✅ Selesai)
    Memungkinkan Admin dan Customer untuk memperbarui data profil mereka sendiri (Nama, Email, Password). Khusus untuk User/Customer, ditambahkan field nomor telepon untuk melengkapi identitas akun.
 
-8. **📊 Advanced Analytics Dashboard**
+8. ~~**📊 Advanced Analytics Dashboard**~~ (✅ Selesai)
    Visualisasi statistik pengiriman pesan, rate keberhasilan vs kegagalan, dan performa blast harian melalui chart yang interaktif.
-9. **🏷️ Contact Tagging & Segmentation**
+9. ~~**🏷️ Contact Tagging & Segmentation**~~ (✅ Selesai)
    Sistem pelabelan kontak (seperti "VIP", "New Lead") untuk mempermudah pengiriman pesan blast yang lebih personal dan tersegmentasi.
-10. **📁 Media Library (Storage)**
+10. ~~**📁 Media Library (Storage)**~~ (✅ Selesai)
     Penyimpanan cloud internal untuk file gambar, PDF, dan video. User bisa mengunggah file sekali dan menggunakannya berulang kali tanpa perlu URL eksternal.
 11. **👥 Multi-Agent & Role Permissions**
     Manajemen tim yang memungkinkan user utama membuat sub-akun untuk CS dengan hak akses terbatas (Role-Based Access Control).
