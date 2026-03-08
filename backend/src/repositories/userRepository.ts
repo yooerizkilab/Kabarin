@@ -26,10 +26,18 @@ export const userRepository = {
         });
     },
 
-    async update(id: string, data: { email?: string; name?: string; phone?: string | null }) {
+    async update(id: string, data: {
+        email?: string;
+        name?: string;
+        phone?: string | null;
+        workingHoursEnabled?: boolean;
+        workingHoursStart?: string | null;
+        workingHoursEnd?: string | null;
+        timezone?: string;
+    }) {
         return prisma.user.update({
             where: { id },
-            data,
+            data: data as any,
         });
     },
 

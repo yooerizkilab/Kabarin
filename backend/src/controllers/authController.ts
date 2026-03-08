@@ -87,8 +87,16 @@ export const authController = {
     },
 
     async updateProfile(request: FastifyRequest, reply: FastifyReply) {
-        const { id } = request.user as { id: string };
-        const { name, email, phone } = request.body as { name?: string; email?: string; phone?: string };
+        const { id } = request.user;
+        const { name, email, phone, workingHoursEnabled, workingHoursStart, workingHoursEnd, timezone } = request.body as {
+            name?: string;
+            email?: string;
+            phone?: string;
+            workingHoursEnabled?: boolean;
+            workingHoursStart?: string;
+            workingHoursEnd?: string;
+            timezone?: string;
+        };
 
         // Check if email is already taken by another user
         if (email) {
@@ -98,7 +106,9 @@ export const authController = {
             }
         }
 
-        const user = await userRepository.update(id, { name, email, phone });
+        const user = await userRepository.update(id, {
+            name, email, phone, workingHoursEnabled, workingHoursStart, workingHoursEnd, timezone
+        });
         const { password: _, ...safe } = user;
         return reply.send({ success: true, message: 'Profile updated', data: safe });
     },

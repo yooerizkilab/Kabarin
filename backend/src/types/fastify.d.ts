@@ -10,6 +10,10 @@ declare module '@fastify/jwt' {
             parentId?: string | null;
             ownerId: string;
             permissions?: any;
+            workingHoursEnabled: boolean;
+            workingHoursStart: string | null;
+            workingHoursEnd: string | null;
+            timezone: string;
         };
     }
 }

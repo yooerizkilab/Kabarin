@@ -8,23 +8,27 @@ import MediaSelector from '@/components/MediaSelector';
 
 export default function SendPage() {
   const { devices, setDevices } = useDeviceStore();
-  const [form, setForm] = useState({ deviceId: '', to: '', content: '', type: 'TEXT', mediaUrl: '' });
+  const [form, setForm] = useState({ deviceId: '', to: '', content: '', type: 'TEXT', mediaUrl: '', scheduledAt: '' });
   const [loading, setLoading] = useState(false);
   const [showMediaSelector, setShowMediaSelector] = useState(false);
+  const [useScheduling, setUseScheduling] = useState(false);
 
   useEffect(() => {
     deviceAPI.list().then((r) => setDevices(r.data.data));
   }, []);
 
-  // Render all devices to prevent UI flickering on temporary disconnects
-
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      await messageAPI.send(form);
-      toast.success('Message sent successfully');
-      setForm((f) => ({ ...f, to: '', content: '', mediaUrl: '' }));
+      const payload = { ...form };
+      if (!useScheduling) {
+          delete (payload as any).scheduledAt;
+      }
+      await messageAPI.send(payload);
+      toast.success(useScheduling ? 'Message scheduled successfully' : 'Message sent successfully');
+      setForm((f) => ({ ...f, to: '', content: '', mediaUrl: '', scheduledAt: '' }));
+      setUseScheduling(false);
     } catch (e: any) {
       toast.error(e.response?.data?.message || 'Failed to send message');
     } finally {
@@ -127,8 +131,40 @@ export default function SendPage() {
           />
         </div>
 
+        <div className="p-4 bg-gray-800/30 rounded-lg border border-gray-700 space-y-3">
+            <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                    <span className="text-lg">🕒</span>
+                    <span className="text-sm font-medium text-white">Schedule for later</span>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                    <input 
+                        type="checkbox" 
+                        className="sr-only peer"
+                        checked={useScheduling}
+                        onChange={(e) => setUseScheduling(e.target.checked)}
+                    />
+                    <div className="w-10 h-5 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-brand-600"></div>
+                </label>
+            </div>
+
+            {useScheduling && (
+                <div className="pt-2 border-t border-gray-700/50">
+                    <label className="label !text-xs">Scheduled Time</label>
+                    <input 
+                        className="input"
+                        type="datetime-local"
+                        value={form.scheduledAt}
+                        onChange={(e) => setForm({ ...form, scheduledAt: e.target.value })}
+                        required={useScheduling}
+                        min={new Date().toISOString().slice(0, 16)}
+                    />
+                </div>
+            )}
+        </div>
+
         <button type="submit" className="btn-primary w-full justify-center" disabled={loading}>
-          {loading ? 'Sending…' : '💬 Send Message'}
+          {loading ? (useScheduling ? 'Scheduling...' : 'Sending...') : (useScheduling ? '🕒 Schedule Message' : '💬 Send Message')}
         </button>
       </form>
     </div>

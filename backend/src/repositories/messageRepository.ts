@@ -7,8 +7,9 @@ export const messageRepository = {
         type: 'TEXT' | 'IMAGE' | 'DOCUMENT';
         content: string;
         mediaUrl?: string;
+        scheduledAt?: Date | null;
     }) {
-        return prisma.message.create({ data });
+        return prisma.message.create({ data: data as any });
     },
 
     async updateStatus(id: string, status: string, sentAt?: Date) {

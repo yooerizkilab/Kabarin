@@ -2,20 +2,49 @@ import { FastifyRequest, FastifyReply } from 'fastify';
 import { messageRepository } from '../repositories/messageRepository';
 import { sessionManager } from '../baileys/sessionManager';
 import { prisma } from '../config/prisma';
+import { addMessageJob } from '../queues/messageQueue';
+import { calculateDelay } from '../utils/workingHours';
 
 export const messageController = {
     async send(request: FastifyRequest, reply: FastifyReply) {
-        const { deviceId, to, type = 'TEXT', content, mediaUrl } = request.body as {
+        const { deviceId, to, type = 'TEXT', content, mediaUrl, scheduledAt } = request.body as {
             deviceId: string;
             to: string;
             type?: 'TEXT' | 'IMAGE' | 'DOCUMENT';
             content: string;
             mediaUrl?: string;
+            scheduledAt?: string;
         };
 
-        const message = await messageRepository.create({ deviceId, to, type, content, mediaUrl });
+        const { ownerId, role } = request.user;
+
+        // Fetch owner settings (Working Hours)
+        const owner = await prisma.user.findUnique({
+            where: { id: ownerId }
+        });
+
+        if (!owner) return reply.status(404).send({ success: false, message: 'Owner not found' });
+
+        const message = await messageRepository.create({
+            deviceId,
+            to,
+            type,
+            content,
+            mediaUrl,
+            scheduledAt: scheduledAt ? new Date(scheduledAt) : null
+        });
+
+        const delay = calculateDelay(message.scheduledAt, owner);
 
         try {
+            if (delay > 0) {
+                // Queue the message
+                await addMessageJob(message.id, delay);
+                await messageRepository.addLog(message.id, 'queued', { delay, scheduledAt: (message as any).scheduledAt });
+                return reply.send({ success: true, message: 'Message queued/scheduled', data: { ...message, status: 'PENDING' } });
+            }
+
+            // Send immediately
             if (type === 'TEXT') {
                 await sessionManager.sendTextMessage(deviceId, to, content);
             } else if (type === 'IMAGE' && mediaUrl) {
@@ -28,7 +57,6 @@ export const messageController = {
             await messageRepository.addLog(message.id, 'sent');
 
             // Increment kuota message user (Skip if ADMIN)
-            const { ownerId, role } = request.user;
             if (role !== 'ADMIN') {
                 await prisma.user.update({
                     where: { id: ownerId },

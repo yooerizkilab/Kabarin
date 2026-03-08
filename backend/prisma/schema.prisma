@@ -28,6 +28,12 @@ model User {
   messagesSentThisMonth Int                  @default(0) @map("messages_sent_this_month")
   createdAt             DateTime             @default(now()) @map("created_at")
   updatedAt             DateTime             @updatedAt @map("updated_at")
+  
+  // Working Hours & Scheduling
+  workingHoursEnabled   Boolean              @default(false) @map("working_hours_enabled")
+  workingHoursStart     String?              @default("09:00") @map("working_hours_start")
+  workingHoursEnd       String?              @default("17:00") @map("working_hours_end")
+  timezone              String               @default("UTC")
 
   devices             Device[]
   contacts            Contact[]
@@ -214,6 +220,7 @@ model Message {
   content    String           @db.Text
   mediaUrl   String?          @map("media_url")
   status     MessageStatus    @default(PENDING)
+  scheduledAt DateTime?        @map("scheduled_at")
   sentAt     DateTime?        @map("sent_at")
   createdAt  DateTime         @default(now()) @map("created_at")
   updatedAt  DateTime         @updatedAt @map("updated_at")

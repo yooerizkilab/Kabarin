@@ -8,6 +8,7 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "worker": "tsx watch src/workers/blastWorker.ts",
+    "worker:message": "tsx watch src/workers/messageWorker.ts",
     "prisma:migrate": "prisma migrate dev",
     "prisma:generate": "prisma generate",
     "prisma:studio": "prisma studio",

@@ -11,7 +11,11 @@ export default function ProfileManager() {
     const [formData, setFormData] = useState({
         name: '',
         email: '',
-        phone: ''
+        phone: '',
+        workingHoursEnabled: false,
+        workingHoursStart: '09:00',
+        workingHoursEnd: '17:00',
+        timezone: 'UTC'
     });
 
     const [passwordData, setPasswordData] = useState({
@@ -25,7 +29,11 @@ export default function ProfileManager() {
             setFormData({
                 name: user.name || '',
                 email: user.email || '',
-                phone: (user as any).phone || ''
+                phone: (user as any).phone || '',
+                workingHoursEnabled: (user as any).workingHoursEnabled || false,
+                workingHoursStart: (user as any).workingHoursStart || '09:00',
+                workingHoursEnd: (user as any).workingHoursEnd || '17:00',
+                timezone: (user as any).timezone || 'UTC'
             });
         }
     }, [user]);
@@ -110,6 +118,70 @@ export default function ProfileManager() {
                     </div>
                     <button className="btn-primary w-full" type="submit" disabled={loading}>
                         {loading ? 'Saving...' : 'Update Profile'}
+                    </button>
+                </form>
+            </div>
+
+            {/* Working Hours */}
+            <div className="card">
+                <h2 className="section-title mb-6 flex items-center gap-2">
+                    <span>🕒</span> Working Hours
+                </h2>
+                <form onSubmit={handleUpdateProfile} className="space-y-4">
+                    <div className="flex items-center justify-between p-3 bg-gray-800/50 rounded-lg">
+                        <div>
+                            <p className="text-sm font-medium text-white">Enable Working Hours</p>
+                            <p className="text-xs text-gray-400">Strictly send messages only during these hours</p>
+                        </div>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                            <input 
+                                type="checkbox" 
+                                className="sr-only peer"
+                                checked={formData.workingHoursEnabled}
+                                onChange={(e) => setFormData({...formData, workingHoursEnabled: e.target.checked})}
+                            />
+                            <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-600"></div>
+                        </label>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="label">Start Time</label>
+                            <input 
+                                className="input"
+                                type="time"
+                                value={formData.workingHoursStart}
+                                onChange={(e) => setFormData({...formData, workingHoursStart: e.target.value})}
+                                disabled={!formData.workingHoursEnabled}
+                            />
+                        </div>
+                        <div>
+                            <label className="label">End Time</label>
+                            <input 
+                                className="input"
+                                type="time"
+                                value={formData.workingHoursEnd}
+                                onChange={(e) => setFormData({...formData, workingHoursEnd: e.target.value})}
+                                disabled={!formData.workingHoursEnabled}
+                            />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label className="label">Timezone</label>
+                        <select 
+                            className="input"
+                            value={formData.timezone}
+                            onChange={(e) => setFormData({...formData, timezone: e.target.value})}
+                        >
+                            <option value="UTC">UTC</option>
+                            <option value="Asia/Jakarta">WIB (GTM+7)</option>
+                            <option value="Asia/Singapore">SGT (GMT+8)</option>
+                        </select>
+                    </div>
+
+                    <button className="btn-primary w-full" type="submit" disabled={loading}>
+                        {loading ? 'Saving...' : 'Save Settings'}
                     </button>
                 </form>
             </div>

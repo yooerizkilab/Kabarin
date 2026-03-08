@@ -32,8 +32,15 @@ export const authAPI = {
         api.post('/auth/login', { email, password }),
     register: (data: any) => api.post('/auth/register', data),
     me: () => api.get('/auth/me'),
-    updateProfile: (data: { name?: string; email?: string; phone?: string }) =>
-        api.put('/auth/profile', data),
+    updateProfile: (data: {
+        name?: string;
+        email?: string;
+        phone?: string;
+        workingHoursEnabled?: boolean;
+        workingHoursStart?: string;
+        workingHoursEnd?: string;
+        timezone?: string;
+    }) => api.put('/auth/profile', data),
     changePassword: (data: { currentPassword: string; newPassword: string }) =>
         api.put('/auth/profile/password', data),
 };
@@ -48,8 +55,14 @@ export const deviceAPI = {
 
 // ── Messages ──────────────────────────────────────────────
 export const messageAPI = {
-    send: (data: { deviceId: string; to: string; content: string; type?: string; mediaUrl?: string }) =>
-        api.post('/messages/send', data),
+    send: (data: {
+        deviceId: string;
+        to: string;
+        content: string;
+        type?: string;
+        mediaUrl?: string;
+        scheduledAt?: string;
+    }) => api.post('/messages/send', data),
     getLogs: (params?: { deviceId?: string; status?: string; limit?: number; offset?: number }) =>
         api.get('/messages/logs', { params }),
 };

@@ -25,9 +25,9 @@ Project ini dibangun dengan arsitektur skalabel sehingga sangat mudah untuk dike
    Sistem pelabelan kontak (seperti "VIP", "New Lead") untuk mempermudah pengiriman pesan blast yang lebih personal dan tersegmentasi.
 10. ~~**📁 Media Library (Storage)**~~ (✅ Selesai)
     Penyimpanan cloud internal untuk file gambar, PDF, dan video. User bisa mengunggah file sekali dan menggunakannya berulang kali tanpa perlu URL eksternal.
-    11.- [x] #11 Multi-Agent & Role Permissions (Sub-accounts for CS)
+11. ~~**👥 Multi-Agent & Role Permissions**~~ (✅ Selesai)
     Manajemen tim yang memungkinkan user utama membuat sub-akun untuk CS dengan hak akses terbatas (Role-Based Access Control).
-11. **🕒 Global Message Scheduling**
+12. **🕒 Global Message Scheduling**~~ (✅ Selesai)
     Fitur penjadwalan pesan satuan (oneshot) serta pengaturan "Jam Kerja" operasional sistem.
-12. **🔗 Interactive Button & List Messages**
+13. **🔗 Interactive Button & List Messages**
     Mengimplementasikan pesan tombol (Buttons) dan daftar menu (Lists) WhatsApp untuk meningkatkan interaksi dan konversi user.
