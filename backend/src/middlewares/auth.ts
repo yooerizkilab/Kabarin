@@ -17,7 +17,11 @@ export async function authenticate(request: FastifyRequest, reply: FastifyReply)
                 email: apiKey.user.email,
                 role: apiKey.user.role,
                 name: apiKey.user.name,
-                ownerId: apiKey.user.id // API Keys are always primary user
+                ownerId: apiKey.user.id, // API Keys are always primary user
+                workingHoursEnabled: (apiKey.user as any).workingHoursEnabled,
+                workingHoursStart: (apiKey.user as any).workingHoursStart,
+                workingHoursEnd: (apiKey.user as any).workingHoursEnd,
+                timezone: (apiKey.user as any).timezone || 'UTC'
             };
             return;
         }
@@ -32,7 +36,11 @@ export async function authenticate(request: FastifyRequest, reply: FastifyReply)
             name: payload.name || '',
             parentId: payload.parentId,
             ownerId: payload.parentId || payload.id,
-            permissions: payload.permissions
+            permissions: payload.permissions,
+            workingHoursEnabled: payload.workingHoursEnabled || false,
+            workingHoursStart: payload.workingHoursStart || '09:00',
+            workingHoursEnd: payload.workingHoursEnd || '17:00',
+            timezone: payload.timezone || 'UTC'
         };
     } catch (err) {
         reply.status(401).send({ success: false, message: 'Unauthorized' });
