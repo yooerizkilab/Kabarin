@@ -23,7 +23,7 @@ Untuk menjaga stabilitas server, kami menerapkan kebijakan Rate Limit:
 
 ---
 
-### 1. Authentication (`/api/auth`)
+### 1. Authentication (`/api/v1/auth`)
 
 - **`POST /register`**: Mendaftarkan akun baru.
 - **`POST /login`**: Mendapatkan token JWT.
@@ -45,7 +45,7 @@ Untuk menjaga stabilitas server, kami menerapkan kebijakan Rate Limit:
 
 ---
 
-### 2. Devices - Perangkat WA (`/api/devices`)
+### 2. Devices - Perangkat WA (`/api/v1/devices`)
 
 - **`GET /`**: Menampilkan daftar semua sesi perangkat.
 - **`POST /connect`**: Inisialisasi koneksi perangkat baru (QR Code).
@@ -54,7 +54,7 @@ Untuk menjaga stabilitas server, kami menerapkan kebijakan Rate Limit:
 
 ---
 
-### 3. Messaging - Pesan (`/api/messages`)
+### 3. Messaging - Pesan (`/api/v1/messages`)
 
 - **`POST /send`**: Mengirim pesan tunggal.
   - **Payload**:
@@ -75,7 +75,7 @@ Untuk menjaga stabilitas server, kami menerapkan kebijakan Rate Limit:
 
 ---
 
-### 4. Contacts & Groups (`/api/contacts`)
+### 4. Contacts & Groups (`/api/v1/contacts`)
 
 - **`GET /`**: Daftar semua kontak.
 - **`POST /`**: Tambah kontak baru.
@@ -87,7 +87,7 @@ Untuk menjaga stabilitas server, kami menerapkan kebijakan Rate Limit:
 
 ---
 
-### Tags / Segments (`/api/tags`)
+### Tags / Segments (`/api/v1/tags`)
 
 Manage contact segments with custom colors.
 
@@ -99,24 +99,24 @@ Manage contact segments with custom colors.
 
 ---
 
-### Media
+### Media (`/api/v1/media`)
 
-- `GET /api/media` - List media items
-- `POST /api/media` - Upload media
-- `DELETE /api/media/:id` - Delete media
-
----
-
-### Agents
-
-- `GET /api/agents` - List team members
-- `POST /api/agents` - Create agent
-- `PUT /api/agents/:id` - Update agent
-- `DELETE /api/agents/:id` - Delete agent
+- `GET /` - List media items
+- `POST /` - Upload media
+- `DELETE /:id` - Delete media
 
 ---
 
-### 5. Analytics Dashboard (`/api/analytics`)
+### Agents (`/api/v1/agents`)
+
+- `GET /` - List team members
+- `POST /` - Create agent
+- `PUT /:id` - Update agent
+- `DELETE /:id` - Delete agent
+
+---
+
+### 5. Analytics Dashboard (`/api/v1/analytics`)
 
 Statistik performa pesan dan kampanye.
 
@@ -126,7 +126,7 @@ Statistik performa pesan dan kampanye.
 
 ---
 
-### 6. Media Library & Storage (`/api/media`)
+### 6. Media Library & Storage (`/api/v1/media`)
 
 Penyimpanan aset media internal.
 
@@ -136,7 +136,7 @@ Penyimpanan aset media internal.
 
 ---
 
-### 7. Templates (`/api/templates`)
+### 7. Templates (`/api/v1/templates`)
 
 - **`GET /`**: Daftar template pesan.
 - **`POST /`**: Buat template baru.
@@ -145,7 +145,7 @@ Penyimpanan aset media internal.
 
 ---
 
-### 8. Auto Responder (`/api/auto-responder`)
+### 8. Auto Responder (`/api/v1/auto-responder`)
 
 - **`GET /`**: Daftar auto-responder.
 - **`POST /`**: Buat auto-responder baru.
@@ -156,7 +156,7 @@ Penyimpanan aset media internal.
 
 ---
 
-### 9. Webhooks (`/api/webhooks`)
+### 9. Webhooks (`/api/v1/webhooks`)
 
 - **`GET /`**: Daftar webhook terdaftar.
 - **`POST /`**: Daftarkan URL webhook baru.
@@ -165,7 +165,7 @@ Penyimpanan aset media internal.
 
 ---
 
-### 10. Billing & Plans (`/api/billing`)
+### 10. Billing & Plans (`/api/v1/billing`)
 
 - **`GET /plans`** (Publik): Daftar paket langganan yang tersedia.
 - **`POST /webhook`** (Publik): Endpoint untuk notifikasi Midtrans.
@@ -174,14 +174,14 @@ Penyimpanan aset media internal.
 
 ---
 
-### 11. Chats (`/api/chats`)
+### 11. Chats (`/api/v1/chats`)
 
 - **`GET /`**: Daftar percakapan aktif.
 - **`GET /history`**: Riwayat pesan dalam percakapan tertentu.
 
 ---
 
-### 12. Admin Management (`/api/admin`)
+### 12. Admin Management (`/api/v1/admin`)
 
 _Hanya dapat diakses oleh pengguna dengan role Admin._
 

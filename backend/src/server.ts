@@ -86,21 +86,25 @@ async function buildServer() {
 
     // ── Routes ────────────────────────────────────────────────
     fastify.get('/ping', async () => ({ pong: true }));
-    fastify.register(authRoutes, { prefix: '/auth' });
-    fastify.register(deviceRoutes, { prefix: '/devices' });
-    fastify.register(messageRoutes, { prefix: '/messages' });
-    fastify.register(chatRoutes, { prefix: '/chats' });
-    fastify.register(templateRoutes, { prefix: '/templates' });
-    fastify.register(contactRoutes, { prefix: '/contacts' });
-    fastify.register(autoResponderRoutes, { prefix: '/auto-responder' });
-    fastify.register(webhookRoutes, { prefix: '/webhooks' });
-    fastify.register(billingRoutes, { prefix: '/billing' });
-    fastify.register(adminRoutes, { prefix: '/admin' });
-    fastify.register(apiKeyRoutes, { prefix: '/api-keys' });
-    fastify.register(analyticsRoutes, { prefix: '/analytics' });
-    fastify.register(tagRoutes, { prefix: '/tags' });
-    fastify.register(mediaRoutes, { prefix: '/media' });
-    fastify.register(agentRoutes, { prefix: '/agents' });
+
+    // API Versioning v1
+    fastify.register(async (v1) => {
+        v1.register(authRoutes, { prefix: '/auth' });
+        v1.register(deviceRoutes, { prefix: '/devices' });
+        v1.register(messageRoutes, { prefix: '/messages' });
+        v1.register(chatRoutes, { prefix: '/chats' });
+        v1.register(templateRoutes, { prefix: '/templates' });
+        v1.register(contactRoutes, { prefix: '/contacts' });
+        v1.register(autoResponderRoutes, { prefix: '/auto-responder' });
+        v1.register(webhookRoutes, { prefix: '/webhooks' });
+        v1.register(billingRoutes, { prefix: '/billing' });
+        v1.register(adminRoutes, { prefix: '/admin' });
+        v1.register(apiKeyRoutes, { prefix: '/api-keys' });
+        v1.register(analyticsRoutes, { prefix: '/analytics' });
+        v1.register(tagRoutes, { prefix: '/tags' });
+        v1.register(mediaRoutes, { prefix: '/media' });
+        v1.register(agentRoutes, { prefix: '/agents' });
+    }, { prefix: '/v1' });
 
     // ── Error handler ─────────────────────────────────────────
     fastify.setErrorHandler(errorHandler);

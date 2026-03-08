@@ -24,7 +24,7 @@ Content-Type: application/json
 
 Endpoint ini digunakan untuk mengirim pesan tunggal secara real-time atau terjadwal.
 
-- **URL:** `POST /messages/send`
+- **URL:** `POST /v1/messages/send`
 - **Method:** `POST`
 
 ### A. Pesan Teks (Teks Biasa)
@@ -87,7 +87,7 @@ Tambahkan field `scheduledAt` dengan format ISO 8601.
 
 Pastikan perangkat WhatsApp Anda dalam status `CONNECTED` sebelum mengirim pesan.
 
-- **URL:** `GET /devices/:id/status`
+- **URL:** `GET /v1/devices/:id/status`
 - **Method:** `GET`
 
 **Response Example:**
@@ -109,11 +109,11 @@ Pastikan perangkat WhatsApp Anda dalam status `CONNECTED` sebelum mengirim pesan
 
 Mengecek status pengiriman pesan yang sudah dikirim.
 
-- **URL:** `GET /messages/logs`
+- **URL:** `GET /v1/messages/logs`
 - **Method:** `GET`
 - **Query Params:** `deviceId`, `status`, `limit`, `offset`
 
-**Contoh Request:** `/messages/logs?status=FAILED&limit=10`
+**Contoh Request:** `/v1/messages/logs?status=FAILED&limit=10`
 
 ---
 
@@ -122,7 +122,7 @@ Mengecek status pengiriman pesan yang sudah dikirim.
 ### Menggunakan cURL
 
 ```bash
-curl -X POST http://localhost:3001/messages/send \
+curl -X POST http://localhost:3001/v1/messages/send \
   -H "x-api-key: your_api_key" \
   -H "Content-Type: application/json" \
   -d '{
@@ -141,7 +141,7 @@ const axios = require("axios");
 const sendMessage = async () => {
   try {
     const response = await axios.post(
-      "http://localhost:3001/messages/send",
+      "http://localhost:3001/v1/messages/send",
       {
         deviceId: "your_device_id",
         to: "628123456789",
@@ -167,7 +167,7 @@ sendMessage();
 
 ## ⚠️ Batasan (Limits)
 
-1. **Kuota**: Tergantung pada paket langganan Anda. Cek kuota di `GET /billing/me`.
+1. **Kuota**: Tergantung pada paket langganan Anda. Cek kuota di `GET /v1/billing/me`.
 2. **Rate Limit (API)**:
    - Maksimal **100 request per menit** per User/IP.
    - Jika melampaui batas, server akan mengembalikan error `429 Too Many Requests`.
