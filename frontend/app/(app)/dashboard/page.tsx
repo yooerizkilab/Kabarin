@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { deviceAPI, messageAPI, blastAPI, billingAPI } from '@/services/api';
 import { useDeviceStore } from '@/store/deviceStore';
 import Link from 'next/link';
+import DashboardAnalytics from '@/components/DashboardAnalytics';
 
 export default function DashboardPage() {
   const { devices, setDevices } = useDeviceStore();
@@ -42,68 +43,8 @@ export default function DashboardPage() {
         <p className="text-gray-400 mt-1">Overview of your WhatsApp Gateway</p>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="stat-card">
-          <span className="text-2xl">📱</span>
-          <div className="stat-value">{connected}</div>
-          <div className="stat-label">Active Devices</div>
-        </div>
-        <div className="stat-card">
-          <span className="text-2xl">📞</span>
-          <div className="stat-value">{devices.length}</div>
-          <div className="stat-label">Total Devices</div>
-        </div>
-        <div className="stat-card">
-          <span className="text-2xl">💬</span>
-          <div className="stat-value">{stats.messages}</div>
-          <div className="stat-label">Messages Sent</div>
-        </div>
-        <div className="stat-card">
-          <span className="text-2xl">📢</span>
-          <div className="stat-value">{stats.blastJobs}</div>
-          <div className="stat-label">Blast Campaigns</div>
-        </div>
-      </div>
-
-      {/* Quota Usage */}
-      {billing && (
-        <div className="card">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="section-title">Message Quota Usage</h2>
-            {billing.role !== 'ADMIN' && (
-              <Link href="/billing" className="text-xs text-brand-400 hover:underline">Manage Billing</Link>
-            )}
-          </div>
-          <div className="space-y-4">
-            {billing.role === 'ADMIN' ? (
-                <div className="flex flex-col items-center justify-center py-4 bg-blue-900/10 rounded-xl border border-blue-800/30">
-                    <span className="text-4xl mb-2">∞</span>
-                    <p className="text-sm font-bold text-blue-400 uppercase tracking-widest">Unlimited Admin Access</p>
-                    <p className="text-xs text-gray-500 mt-1">You are not restricted by any subscription limits.</p>
-                </div>
-            ) : (
-                <>
-                    <div className="flex justify-between text-sm mb-1">
-                    <span className="text-gray-400">Monthly Usage: <span className="text-white font-medium">{billing.messagesSentThisMonth.toLocaleString()} / {(billing.currentPlan?.maxMessagesPerMonth || 100).toLocaleString()}</span></span>
-                    <span className="text-white font-bold">{Math.round((billing.messagesSentThisMonth / (billing.currentPlan?.maxMessagesPerMonth || 100)) * 100)}%</span>
-                    </div>
-                    <div className="w-full bg-gray-800 rounded-full h-3 overflow-hidden">
-                    <div 
-                        className={`h-full rounded-full transition-all duration-1000 ${
-                        (billing.messagesSentThisMonth / (billing.currentPlan?.maxMessagesPerMonth || 100)) > 0.9 ? 'bg-red-500' : 'bg-brand-500'
-                        }`}
-                        style={{ width: `${Math.min((billing.messagesSentThisMonth / (billing.currentPlan?.maxMessagesPerMonth || 100)) * 100, 100)}%` }}
-                    ></div>
-                    </div>
-                    <p className="text-xs text-gray-500 italic">
-                    Plan: <span className="text-gray-300 font-medium uppercase">{billing.currentPlan?.name || 'Free Tier'}</span> • Expires: {billing.subscriptionEndDate ? new Date(billing.subscriptionEndDate).toLocaleDateString() : 'N/A'}
-                    </p>
-                </>
-            )}
-          </div>
-        </div>
-      )}
+      {/* Advanced Analytics */}
+      <DashboardAnalytics />
 
       {/* Quick links */}
       <div className="card">

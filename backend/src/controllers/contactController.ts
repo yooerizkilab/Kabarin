@@ -6,26 +6,27 @@ import { MultipartFile } from '@fastify/multipart';
 export const contactController = {
     async list(request: FastifyRequest, reply: FastifyReply) {
         const { id: userId } = request.user as { id: string };
-        const { groupId } = request.query as { groupId?: string };
-        const contacts = await contactRepository.findAll(userId, groupId);
+        const { groupId, tagId } = request.query as { groupId?: string; tagId?: string };
+        const contacts = await contactRepository.findAll(userId, groupId, tagId);
         return reply.send({ success: true, data: contacts });
     },
 
     async create(request: FastifyRequest, reply: FastifyReply) {
         const { id: userId } = request.user as { id: string };
-        const { name, phone, email, groupId } = request.body as {
+        const { name, phone, email, groupId, tagIds } = request.body as {
             name: string;
             phone: string;
             email?: string;
             groupId?: string;
+            tagIds?: string[];
         };
-        const contact = await contactRepository.create({ userId, name, phone, email, groupId });
+        const contact = await contactRepository.create({ userId, name, phone, email, groupId, tagIds });
         return reply.status(201).send({ success: true, data: contact });
     },
 
     async update(request: FastifyRequest, reply: FastifyReply) {
         const { id } = request.params as { id: string };
-        const data = request.body as Partial<{ name: string; phone: string; email: string; groupId: string }>;
+        const data = request.body as Partial<{ name: string; phone: string; email: string; groupId: string; tagIds: string[] }>;
         const contact = await contactRepository.update(id, data);
         return reply.send({ success: true, data: contact });
     },

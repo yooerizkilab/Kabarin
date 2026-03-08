@@ -1,28 +1,47 @@
 import { prisma } from '../config/prisma';
 
 export const contactRepository = {
-    async findAll(userId: string, groupId?: string) {
+    async findAll(userId: string, groupId?: string, tagId?: string) {
         return prisma.contact.findMany({
-            where: { userId, ...(groupId && { groupId }) },
-            include: { group: true },
+            where: {
+                userId,
+                ...(groupId && { groupId }),
+                ...(tagId && { tags: { some: { id: tagId } } })
+            },
+            include: { group: true, tags: true },
             orderBy: { name: 'asc' },
         });
     },
 
     async findById(id: string) {
-        return prisma.contact.findUnique({ where: { id }, include: { group: true } });
+        return prisma.contact.findUnique({ where: { id }, include: { group: true, tags: true } });
     },
 
-    async create(data: { userId: string; name: string; phone: string; email?: string; groupId?: string }) {
-        return prisma.contact.create({ data });
+    async create(data: { userId: string; name: string; phone: string; email?: string; groupId?: string; tagIds?: string[] }) {
+        const { tagIds, ...contactData } = data;
+        return prisma.contact.create({
+            data: {
+                ...contactData,
+                tags: tagIds ? { connect: tagIds.map(id => ({ id })) } : undefined
+            },
+            include: { tags: true }
+        });
     },
 
     async createMany(contacts: { userId: string; name: string; phone: string; email?: string; groupId?: string }[]) {
         return prisma.contact.createMany({ data: contacts, skipDuplicates: true });
     },
 
-    async update(id: string, data: Partial<{ name: string; phone: string; email: string; groupId: string }>) {
-        return prisma.contact.update({ where: { id }, data });
+    async update(id: string, data: Partial<{ name: string; phone: string; email: string; groupId: string; tagIds: string[] }>) {
+        const { tagIds, ...contactData } = data;
+        return prisma.contact.update({
+            where: { id },
+            data: {
+                ...contactData,
+                tags: tagIds ? { set: tagIds.map(id => ({ id })) } : undefined
+            },
+            include: { tags: true }
+        });
     },
 
     async delete(id: string) {

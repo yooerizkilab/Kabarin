@@ -35,6 +35,7 @@ model User {
   autoResponders      AutoResponder[]
   webhooks            Webhook[]
   apiKeys             ApiKey[]
+  tags                Tag[]
   subscriptionPlan    SubscriptionPlan?    @relation(fields: [subscriptionPlanId], references: [id])
   paymentTransactions PaymentTransaction[]
 
@@ -135,11 +136,27 @@ model Contact {
   user             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   group            ContactGroup?      @relation(fields: [groupId], references: [id])
   blastRecipients  BlastRecipient[]
+  tags             Tag[]              @relation("ContactToTag")
 
   @@index([userId])
   @@index([groupId])
   @@index([phone])
   @@map("contacts")
+}
+
+model Tag {
+  id        String    @id @default(uuid())
+  userId    String    @map("user_id")
+  name      String
+  color     String    @default("#3b82f6") // Default blue
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contacts  Contact[] @relation("ContactToTag")
+
+  @@index([userId])
+  @@map("tags")
 }
 
 // ─────────────────────────────────────────────────────────

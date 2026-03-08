@@ -57,6 +57,18 @@ Seluruh API (kecuali rute publik) diamankan menggunakan salah satu metode beriku
 
 ---
 
+### Tags / Segments (`/api/tags`)
+
+Manage contact segments with custom colors.
+
+- **GET `/`**: List all tags.
+- **POST `/`**: Create a new tag.
+  - Body: `{ "name": "VIP", "color": "#ff0000" }`
+- **PUT `/:id`**: Update a tag.
+- **DELETE `/:id`**: Delete a tag.
+
+---
+
 ### 5. Templates (`/api/templates`)
 
 - **`GET /`**: Daftar template pesan.

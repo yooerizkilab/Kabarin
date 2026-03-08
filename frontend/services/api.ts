@@ -87,10 +87,11 @@ export const templateAPI = {
 
 // ── Contacts ──────────────────────────────────────────────
 export const contactAPI = {
-    list: (groupId?: string) => api.get('/contacts', { params: { groupId } }),
-    create: (data: { name: string; phone: string; email?: string; groupId?: string }) =>
+    list: (params?: { groupId?: string; tagId?: string }) => api.get('/contacts', { params }),
+    create: (data: { name: string; phone: string; email?: string; groupId?: string; tagIds?: string[] }) =>
         api.post('/contacts', data),
-    update: (id: string, data: object) => api.put(`/contacts/${id}`, data),
+    update: (id: string, data: Partial<{ name: string; phone: string; email: string; groupId: string; tagIds: string[] }>) =>
+        api.put(`/contacts/${id}`, data),
     delete: (id: string) => api.delete(`/contacts/${id}`),
     importCsv: (file: File, groupId?: string) => {
         const form = new FormData();
@@ -102,6 +103,14 @@ export const contactAPI = {
     },
     listGroups: () => api.get('/contacts/groups'),
     createGroup: (name: string) => api.post('/contacts/groups', { name }),
+};
+
+// ── Tags ──────────────────────────────────────────────────
+export const tagAPI = {
+    list: () => api.get('/tags'),
+    create: (data: { name: string; color?: string }) => api.post('/tags', data),
+    update: (id: string, data: { name?: string; color?: string }) => api.put(`/tags/${id}`, data),
+    delete: (id: string) => api.delete(`/tags/${id}`),
 };
 
 // ── Auto Responder ─────────────────────────────────────────
@@ -171,4 +180,11 @@ export const apiKeyAPI = {
     list: () => api.get('/api-keys'),
     create: (name: string) => api.post('/api-keys', { name }),
     delete: (id: string) => api.delete(`/api-keys/${id}`),
+};
+
+// ── Analytics ─────────────────────────────────────────────
+export const analyticsAPI = {
+    getSummary: () => api.get('/analytics/summary'),
+    getChartData: () => api.get('/analytics/chart'),
+    getBlastStats: () => api.get('/analytics/blasts'),
 };

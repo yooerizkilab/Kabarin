@@ -8,14 +8,19 @@ Fitur ini digunakan untuk mengelola daftar penerima pesan (kontak) dan mengelomp
 - **Contact Groups**: Mengelompokkan kontak ke dalam kategori tertentu (misal: "Reseller", "Pelanggan VIP").
 - **Bulk Import CSV**: Mengimpor ribuan kontak sekaligus dari file CSV.
 - **Auto Mapping**: Mendeteksi kolom nama, telepon, dan email dari CSV secara otomatis.
+- **Tagging & Segmentation**: Melabeli kontak dengan tag kustom berwarna untuk kategorisasi yang lebih mendalam (misal: "Prospect", "Cold Lead").
 
 ## Struktur Database
 
 Model Prisma yang terlibat:
 
 - `Contact`: Data individu kontak.
-- `ContactGroup`: Pengelompokan kontak.
-- Relasi: `Contact` opsional memiliki satu `ContactGroup`.
+- `ContactGroup`: Pengelompokan kontak secara struktural.
+- `Tag`: Label kategorisasi yang fleksibel.
+- Relasi:
+  - `Contact` opsional memiliki satu `ContactGroup`.
+  - `Contact` dapat memiliki **banyak** `Tag` (Many-to-Many).
+  - `User` mengelola `Tag` miliknya sendiri.
 
 ## Format CSV untuk Import
 
@@ -39,3 +44,11 @@ Ani,62898765432,ani@example.com
 2. `parseCsvContacts` (utils) memproses buffer file.
 3. Melakukan normalisasi nomor telepon (menghapus karakter non-digit).
 4. Menyimpan data secara massal menggunakan `prisma.contact.createMany`.
+
+## Tagging & Segmentation
+
+Berbeda dengan **Groups** yang bersifat statis (satu kontak satu grup), **Tags** memungkinkan segmentasi yang lebih dinamis:
+
+- **Warna Kustom**: Mempermudah identifikasi visual di daftar kontak.
+- **Filter Cepat**: Sidebar kontak menyediakan filter per-tag untuk mempermudah broadcast khusus segmen tertentu.
+- **Multi-Assignment**: Satu kontak bisa dilabeli sebagai "Pelanggan" sekaligus "VIP".

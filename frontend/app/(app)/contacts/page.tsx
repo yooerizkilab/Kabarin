@@ -1,37 +1,49 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { contactAPI } from '@/services/api';
+import { contactAPI, tagAPI } from '@/services/api';
 import toast from 'react-hot-toast';
 import { useDropzone } from 'react-dropzone';
+import TagManager from '@/components/TagManager';
 
-interface Contact { id: string; name: string; phone: string; email?: string; group?: { name: string } }
+interface Tag { id: string; name: string; color: string }
+interface Contact { id: string; name: string; phone: string; email?: string; group?: { name: string }; tags: Tag[] }
 interface Group { id: string; name: string }
 
 export default function ContactsPage() {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
+  const [tags, setTags] = useState<Tag[]>([]);
   const [selectedGroup, setSelectedGroup] = useState('');
+  const [selectedTag, setSelectedTag] = useState('');
   const [newGroup, setNewGroup] = useState('');
-  const [form, setForm] = useState({ name: '', phone: '', email: '', groupId: '' });
+  const [form, setForm] = useState({ name: '', phone: '', email: '', groupId: '', tagIds: [] as string[] });
   const [loading, setLoading] = useState(true);
   const [importing, setImporting] = useState(false);
 
   const load = async () => {
-    const [cR, gR] = await Promise.all([contactAPI.list(selectedGroup || undefined), contactAPI.listGroups()]);
+    const [cR, gR, tR] = await Promise.all([
+        contactAPI.list({ 
+            groupId: selectedGroup || undefined, 
+            tagId: selectedTag || undefined 
+        }), 
+        contactAPI.listGroups(),
+        tagAPI.list()
+    ]);
     setContacts(cR.data.data);
     setGroups(gR.data.data);
+    setTags(tR.data.data);
     setLoading(false);
   };
 
-  useEffect(() => { load(); }, [selectedGroup]);
+  useEffect(() => { load(); }, [selectedGroup, selectedTag]);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       await contactAPI.create(form);
       toast.success('Contact added');
-      setForm({ name: '', phone: '', email: '', groupId: '' });
+      setForm({ name: '', phone: '', email: '', groupId: '', tagIds: [] });
       load();
     } catch { toast.error('Failed to add contact'); }
   };
@@ -97,6 +109,31 @@ export default function ContactsPage() {
             </div>
           </div>
 
+          {/* Tags Filter */}
+          <div className="card">
+            <h2 className="section-title mb-3">Segments / Tags</h2>
+            <div className="flex flex-wrap gap-1.5 mb-4">
+              <button
+                onClick={() => setSelectedTag('')}
+                className={`px-3 py-1 rounded-full text-xs transition-colors ${!selectedTag ? 'bg-brand-700 text-white' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
+              >All Segments</button>
+              {tags.map((t) => (
+                <button 
+                    key={t.id} 
+                    onClick={() => setSelectedTag(t.id)}
+                    className={`px-3 py-1 rounded-full text-xs transition-colors border ${selectedTag === t.id ? 'bg-brand-700 text-white border-brand-600' : 'bg-transparent text-gray-400 border-gray-800 hover:border-gray-600'}`}
+                >
+                    <span className="flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: t.color }}></span>
+                        {t.name}
+                    </span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <TagManager />
+
           {/* CSV Import */}
           <div className="card">
             <h2 className="section-title mb-3">Import CSV</h2>
@@ -120,6 +157,32 @@ export default function ContactsPage() {
               <option value="">No group</option>
               {groups.map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}
             </select>
+            
+            <div className="space-y-2">
+                <label className="text-[10px] text-gray-500 uppercase tracking-wider font-bold">Assign Tags</label>
+                <div className="flex flex-wrap gap-2">
+                    {tags.map(tag => (
+                        <button
+                            key={tag.id}
+                            type="button"
+                            onClick={() => {
+                                const newIds = form.tagIds.includes(tag.id)
+                                    ? form.tagIds.filter(id => id !== tag.id)
+                                    : [...form.tagIds, tag.id];
+                                setForm({ ...form, tagIds: newIds });
+                            }}
+                            className={`px-2 py-1 rounded-md text-[10px] font-medium border transition-all ${
+                                form.tagIds.includes(tag.id) 
+                                ? 'bg-brand-600/20 border-brand-500 text-brand-400' 
+                                : 'bg-gray-800/30 border-gray-700 text-gray-500 hover:border-gray-600'
+                            }`}
+                        >
+                            {tag.name}
+                        </button>
+                    ))}
+                </div>
+            </div>
+            
             <button type="submit" className="btn-primary w-full justify-center text-sm">Add Contact</button>
           </form>
         </div>
@@ -134,9 +197,10 @@ export default function ContactsPage() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="text-left text-gray-500 border-b border-gray-800">
-                      <th className="pb-2 pr-4">Name</th>
-                      <th className="pb-2 pr-4">Phone</th>
-                      <th className="pb-2 pr-4">Group</th>
+                      <th className="pb-2 pr-4 text-xs">Name</th>
+                      <th className="pb-2 pr-4 text-xs">Phone</th>
+                      <th className="pb-2 pr-4 text-xs">Group</th>
+                      <th className="pb-2 pr-4 text-xs">Segments</th>
                       <th className="pb-2" />
                     </tr>
                   </thead>
@@ -145,7 +209,24 @@ export default function ContactsPage() {
                       <tr key={c.id} className="hover:bg-gray-800/30 transition-colors">
                         <td className="py-2.5 pr-4 font-medium text-white">{c.name}</td>
                         <td className="py-2.5 pr-4 text-gray-400">{c.phone}</td>
-                        <td className="py-2.5 pr-4 text-gray-400">{c.group?.name || '—'}</td>
+                        <td className="py-2.5 pr-4 text-gray-400">
+                            <span className="px-2 py-0.5 rounded bg-gray-900 border border-gray-800 text-[10px]">
+                                {c.group?.name || 'No Group'}
+                            </span>
+                        </td>
+                        <td className="py-2.5 pr-4">
+                            <div className="flex flex-wrap gap-1">
+                                {c.tags?.map(t => (
+                                    <span 
+                                        key={t.id} 
+                                        className="px-1.5 py-0.5 rounded text-[10px] font-medium border"
+                                        style={{ backgroundColor: `${t.color}15`, borderColor: `${t.color}40`, color: t.color }}
+                                    >
+                                        {t.name}
+                                    </span>
+                                ))}
+                            </div>
+                        </td>
                         <td className="py-2.5">
                           <button onClick={() => handleDelete(c.id)} className="text-red-400 hover:text-red-300 text-xs">Delete</button>
                         </td>
