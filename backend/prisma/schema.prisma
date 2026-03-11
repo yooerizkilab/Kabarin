@@ -228,6 +228,7 @@ model Message {
   device Device       @relation(fields: [deviceId], references: [id], onDelete: Cascade)
   logs   MessageLog[]
 
+  @@index([deviceId, createdAt(sort: Desc)])
   @@index([deviceId])
   @@index([status])
   @@index([to])
@@ -286,8 +287,11 @@ model BlastJob {
   scheduledAt DateTime?   @map("scheduled_at")
   startedAt   DateTime?   @map("started_at")
   completedAt DateTime?   @map("completed_at")
-  createdAt   DateTime    @default(now()) @map("created_at")
-  updatedAt   DateTime    @updatedAt @map("updated_at")
+  totalRecipients Int         @default(0) @map("total_recipients")
+  sentCount       Int         @default(0) @map("sent_count")
+  failedCount     Int         @default(0) @map("failed_count")
+  createdAt       DateTime    @default(now()) @map("created_at")
+  updatedAt       DateTime    @updatedAt @map("updated_at")
 
   user       User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   device     Device            @relation(fields: [deviceId], references: [id], onDelete: Cascade)
@@ -328,6 +332,7 @@ model BlastRecipient {
   contact  Contact? @relation(fields: [contactId], references: [id])
 
   @@index([blastJobId])
+  @@index([blastJobId, status])
   @@index([status])
   @@index([phone])
   @@map("blast_recipients")

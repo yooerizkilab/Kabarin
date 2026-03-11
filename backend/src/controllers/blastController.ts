@@ -56,6 +56,12 @@ export const blastController = {
 
         await blastRepository.createRecipients(recipients);
 
+        // Update totalRecipients count in BlastJob
+        await prisma.blastJob.update({
+            where: { id: job.id },
+            data: { totalRecipients: recipients.length }
+        });
+
         // Limit Quota Increment (Skip if ADMIN)
         const { ownerId: currentOwnerId, role } = request.user;
         if (role !== 'ADMIN') {

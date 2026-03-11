@@ -74,7 +74,7 @@ export async function startBlastWorker() {
                 });
             }
 
-            // Check completion
+            // Efficiently check completion using the repository's new count logic
             const counts = await blastRepository.countRecipients(recipient.blastJobId);
             if (counts.pending === 0) {
                 await blastRepository.updateJobStatus(recipient.blastJobId, 'COMPLETED', {

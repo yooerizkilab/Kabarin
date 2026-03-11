@@ -51,10 +51,26 @@ export const blastRepository = {
 
 
     async updateRecipientStatus(id: string, status: 'SENT' | 'FAILED', error?: string, sentAt?: Date) {
-        return prisma.blastRecipient.update({
+        const recipient = await prisma.blastRecipient.update({
             where: { id },
             data: { status, error, ...(sentAt && { sentAt }) },
+            include: { blastJob: true }
         });
+
+        // Increment counts on the parent job
+        if (status === 'SENT') {
+            await prisma.blastJob.update({
+                where: { id: recipient.blastJobId },
+                data: { sentCount: { increment: 1 } }
+            });
+        } else if (status === 'FAILED') {
+            await prisma.blastJob.update({
+                where: { id: recipient.blastJobId },
+                data: { failedCount: { increment: 1 } }
+            });
+        }
+
+        return recipient;
     },
 
     async findRecipientById(id: string) {
@@ -65,6 +81,21 @@ export const blastRepository = {
     },
 
     async countRecipients(blastJobId: string) {
+        const job = await prisma.blastJob.findUnique({
+            where: { id: blastJobId },
+            select: { totalRecipients: true, sentCount: true, failedCount: true }
+        });
+
+        if (job) {
+            return {
+                total: job.totalRecipients,
+                sent: job.sentCount,
+                failed: job.failedCount,
+                pending: job.totalRecipients - (job.sentCount + job.failedCount)
+            };
+        }
+
+        // Fallback to slow count if job not found (shouldn't happen)
         const [total, sent, failed, pending] = await Promise.all([
             prisma.blastRecipient.count({ where: { blastJobId } }),
             prisma.blastRecipient.count({ where: { blastJobId, status: 'SENT' } }),
