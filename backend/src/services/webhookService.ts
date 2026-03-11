@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { logger } from '../utils/logger';
 import crypto from 'crypto';
 
 export interface WebhookPayload {
@@ -37,11 +38,11 @@ export const webhookService = {
         // Jika gagal, hanya log saja (Fire and Forget)
         axios.post(url, payloadString, { headers, timeout: 5000 })
             .then((res) => {
-                console.log(`[Webhook] ✅ Successfully sent to ${url}. Status: ${res.status}`);
+                // logger.debug(`[Webhook] ✅ Successfully sent to ${url}. Status: ${res.status}`);
             })
             .catch((err) => {
                 const status = err.response ? err.response.status : err.message;
-                console.error(`[Webhook] ❌ Failed to send to ${url}. Error: ${status}`);
+                logger.error(`[Webhook] ❌ Failed to send to ${url}. Error: ${status}`);
             });
     }
 };

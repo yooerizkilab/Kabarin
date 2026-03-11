@@ -2,6 +2,7 @@ import 'dotenv/config';
 import { Worker, Job, ConnectionOptions } from 'bullmq';
 import { redisConnection } from '../config/redis';
 import { prisma } from '../config/prisma';
+import { logger } from '../utils/logger';
 import { sessionManager } from '../baileys/sessionManager';
 import { addMessageJob } from '../queues/messageQueue';
 import { messageRepository } from '../repositories/messageRepository';
@@ -10,19 +11,19 @@ const worker = new Worker(
     'message-queue',
     async (job: Job) => {
         const { messageId } = job.data as { messageId: string };
-        console.log(`[MessageWorker] Processing message: ${messageId}`);
+        // logger.debug(`[MessageWorker] Processing message: ${messageId}`);
 
         const message = await prisma.message.findUnique({
             where: { id: messageId },
         });
 
         if (!message) {
-            console.error(`[MessageWorker] Message ${messageId} not found`);
+            logger.error(`[MessageWorker] Message ${messageId} not found`);
             return;
         }
 
         if (message.status !== 'PENDING') {
-            console.log(`[MessageWorker] Skip: Message ${messageId} status is ${message.status}`);
+            // logger.debug(`[MessageWorker] Skip: Message ${messageId} status is ${message.status}`);
             return;
         }
 
@@ -42,7 +43,7 @@ const worker = new Worker(
             await messageRepository.updateStatus(message.id, 'SENT', new Date());
             await messageRepository.addLog(message.id, 'sent');
         } catch (err: any) {
-            console.error(`[MessageWorker] Failed to send ${messageId}:`, err.message);
+            logger.error(`[MessageWorker] Failed to send ${messageId}:`, err.message);
             await messageRepository.updateStatus(message.id, 'FAILED');
             await messageRepository.addLog(message.id, 'failed', { error: err.message });
         }
@@ -54,10 +55,10 @@ const worker = new Worker(
 );
 
 worker.on('failed', (job, err) => {
-    console.error(`[MessageWorker] Job ${job?.id} failed:`, err.message);
+    logger.error(`[MessageWorker] Job ${job?.id} failed:`, err.message);
 });
 
-console.log('[MessageWorker] BullMQ Message Worker started.');
+logger.info('[MessageWorker] BullMQ Message Worker started.');
 
 // Re-sync pending scheduled messages on startup
 async function backfillScheduledMessages() {

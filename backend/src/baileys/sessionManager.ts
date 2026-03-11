@@ -17,6 +17,7 @@ import { callAI } from '../services/aiService';
 import { webhookRepository } from '../repositories/webhookRepository';
 import { webhookService } from '../services/webhookService';
 import { messageRepository } from '../repositories/messageRepository';
+import { logger } from '../utils/logger';
 
 export interface DeviceSession {
     socket: WASocket;
@@ -116,7 +117,7 @@ class SessionManager {
                         data: { status: 'DISCONNECTED' },
                     });
                 } catch (err) {
-                    console.log(`[Baileys] Ignored disconnect for missing device: ${deviceId}`);
+                    logger.info(`[Baileys] Ignored disconnect for missing device: ${deviceId}`);
                 }
 
                 wsServer.sendToDevice(deviceId, 'device_status', {
@@ -150,7 +151,7 @@ class SessionManager {
                         msg.message.videoMessage?.caption ||
                         '';
 
-                    console.log(`[WhatsApp] Incoming message to ${deviceId} from ${from}: "${text}"`);
+                    logger.info(`[WhatsApp] Incoming message to ${deviceId} from ${from}: "${text}"`);
 
                     // Persist to Database
                     try {
@@ -164,7 +165,7 @@ class SessionManager {
                             status: 'READ',
                         });
                     } catch (err: any) {
-                        console.error(`[Inbox] Error saving incoming message:`, err.message);
+                        logger.error(`[Inbox] Error saving incoming message:`, err.message);
                     }
 
                     // Broadcast incoming message to frontend (Legacy + Sync)
@@ -192,7 +193,7 @@ class SessionManager {
                             });
                         }
                     } catch (err: any) {
-                        console.error(`[Webhook] Error finding webhook for device ${deviceId}:`, err.message);
+                        logger.error(`[Webhook] Error finding webhook for device ${deviceId}:`, err.message);
                     }
 
                     // Auto-responder
@@ -260,7 +261,7 @@ class SessionManager {
             try {
                 await session.socket.logout();
             } catch (err) {
-                console.error(`[SessionManager] Error during logout for ${deviceId}:`, err);
+                logger.error(`[SessionManager] Error during logout for ${deviceId}:`, err);
                 session.socket.end(undefined);
             }
             this.sessions.delete(deviceId);
@@ -279,7 +280,7 @@ class SessionManager {
             try {
                 await this.createSession(device.id);
             } catch (err) {
-                console.error(`Failed to restore session for device ${device.id}:`, err);
+                logger.error(`Failed to restore session for device ${device.id}:`, err);
             }
         }
     }
@@ -296,7 +297,7 @@ class SessionManager {
                 // Silently skip if no responder configured
                 return;
             }
-            // console.log(`[AutoResponder] Found active responder: ${autoResponder.name} for device ${deviceId}`);
+            // logger.debug(`[AutoResponder] Found active responder: ${autoResponder.name} for device ${deviceId}`);
 
             // ── Quota Check ─────────────────────────────────────
             const user: any = autoResponder.user;
@@ -307,9 +308,9 @@ class SessionManager {
                     ? user.subscriptionPlan.maxMessagesPerMonth
                     : 100; // Default Free Tier
 
-                // console.log(`[AutoResponder] Quota check for ${user.id}: ${user.messagesSentThisMonth}/${maxMessages}`);
+                // logger.debug(`[AutoResponder] Quota check for ${user.id}: ${user.messagesSentThisMonth}/${maxMessages}`);
                 if (user.messagesSentThisMonth >= maxMessages) {
-                    console.log(`[AutoResponder] Quota exceeded for user ${user.id}. Skipping reply.`);
+                    logger.info(`[AutoResponder] Quota exceeded for user ${user.id}. Skipping reply.`);
                     return;
                 }
             }
@@ -325,7 +326,7 @@ class SessionManager {
                     const isMentioned = mentionedJids.includes(myId);
 
                     if (!isMentioned) {
-                        // console.log(`[AutoResponder] Skipping group message from ${from} (not mentioned)`);
+                        // logger.debug(`[AutoResponder] Skipping group message from ${from} (not mentioned)`);
                         return;
                     }
                 }
@@ -360,10 +361,10 @@ class SessionManager {
                     }
                 });
 
-                // console.log(`[AutoResponder] Rule ${rule.id} (${matchType}) match: ${matched}`);
+                // logger.debug(`[AutoResponder] Rule ${rule.id} (${matchType}) match: ${matched}`);
                 if (matched) {
                     await this.sendTextMessage(deviceId, from, rule.response);
-                    console.log(`[AutoResponder] Keyword match (${matchType}): "${text}" → rule ${rule.id}`);
+                    logger.info(`[AutoResponder] Keyword match (${matchType}): "${text}" → rule ${rule.id}`);
                     replied = true;
 
                     // Increment Quota (Skip if ADMIN)
@@ -379,7 +380,7 @@ class SessionManager {
 
             // ── 2. AI fallback ─────────────────────────────────────
             if (!replied && autoResponder.aiProvider) {
-                // console.log(`[AutoResponder] No keyword matched. Falling back to AI (${autoResponder.aiProvider})...`);
+                // logger.debug(`[AutoResponder] No keyword matched. Falling back to AI (${autoResponder.aiProvider})...`);
                 const aiReply = await callAI(
                     autoResponder.aiProvider,
                     autoResponder.aiModel || '',
@@ -387,7 +388,7 @@ class SessionManager {
                     text
                 );
                 await this.sendTextMessage(deviceId, from, aiReply);
-                console.log(`[AutoResponder] AI (${autoResponder.aiProvider}) replied to: "${text}"`);
+                logger.info(`[AutoResponder] AI (${autoResponder.aiProvider}) replied to: "${text}"`);
 
                 // Increment Quota (Skip if ADMIN)
                 if (!isAdmin) {
@@ -398,7 +399,7 @@ class SessionManager {
                 }
             }
         } catch (err: any) {
-            console.error(`[AutoResponder] Error handling auto-respond for device ${deviceId}:`, err.message);
+            logger.error(`[AutoResponder] Error handling auto-respond for device ${deviceId}:`, err.message);
         } finally {
             // ── Clear Typing Indicator ──────────────────────────
             const session = this.sessions.get(deviceId);

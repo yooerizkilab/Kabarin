@@ -7,9 +7,10 @@ import { prisma } from '../config/prisma';
 import { blastRepository } from '../repositories/blastRepository';
 import { sessionManager } from '../baileys/sessionManager';
 import { wsServer } from '../websocket/wsServer';
+import { logger } from '../utils/logger';
 
 export async function startBlastWorker() {
-    // console.log('[Worker] Initializing BullMQ Blast Worker...');
+    // logger.debug('[Worker] Initializing BullMQ Blast Worker...');
 
     // Backfill scheduled jobs
     await backfillScheduledJobs();
@@ -18,11 +19,11 @@ export async function startBlastWorker() {
         'blast-queue',
         async (job: Job) => {
             const { recipientId } = job.data as { recipientId: string };
-            // console.log(`[Worker] Processing recipient: ${recipientId}`);
+            // logger.debug(`[Worker] Processing recipient: ${recipientId}`);
 
             const recipient = await blastRepository.findRecipientById(recipientId);
             if (!recipient) {
-                console.error(`[Worker] Recipient ${recipientId} not found in DB`);
+                logger.error(`[Worker] Recipient ${recipientId} not found in DB`);
                 return;
             }
 
@@ -62,7 +63,7 @@ export async function startBlastWorker() {
                     status: 'SENT',
                 });
             } catch (err: any) {
-                console.error(`[Worker] Failed to send to ${recipient.phone}:`, err.message);
+                logger.error(`[Worker] Failed to send to ${recipient.phone}:`, err.message);
                 await blastRepository.updateRecipientStatus(recipient.id, 'FAILED', err.message);
 
                 wsServer.sendToDevice(device.id, 'blast_progress', {
@@ -83,7 +84,7 @@ export async function startBlastWorker() {
                     blastJobId: recipient.blastJobId,
                     stats: counts
                 });
-                console.log(`[Worker] Blast job ${recipient.blastJobId} COMPLETED`);
+                logger.info(`[Worker] Blast job ${recipient.blastJobId} COMPLETED`);
             }
         },
         {
@@ -93,14 +94,14 @@ export async function startBlastWorker() {
     );
 
     worker.on('failed', (job, err) => {
-        console.error(`[Worker] Job ${job?.id} failed:`, err.message);
+        logger.error(`[Worker] Job ${job?.id} failed:`, err.message);
     });
 
-    console.log('[Worker] Blast Worker is now listening for jobs.');
+    logger.info('[Worker] Blast Worker is now listening for jobs.');
 }
 
 async function backfillScheduledJobs() {
-    // console.log('[Worker] Checking for unsent recipients to backfill...');
+    // logger.debug('[Worker] Checking for unsent recipients to backfill...');
     const pendingRecipients = await prisma.blastRecipient.findMany({
         where: { status: 'PENDING' },
         include: { blastJob: true }
@@ -113,7 +114,7 @@ async function backfillScheduledJobs() {
     }
 
     if (pendingRecipients.length > 0) {
-        console.log(`[Worker] Backfilled ${pendingRecipients.length} recipients into Redis.`);
+        logger.info(`[Worker] Backfilled ${pendingRecipients.length} recipients into Redis.`);
     }
 }
 

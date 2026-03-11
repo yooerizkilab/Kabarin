@@ -1,4 +1,5 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
+import { logger } from '../utils/logger';
 import { deviceRepository } from '../repositories/deviceRepository';
 import { sessionManager } from '../baileys/sessionManager';
 
@@ -18,7 +19,7 @@ export const deviceController = {
 
         // Start Baileys session asynchronously
         sessionManager.createSession(device.id).catch((err) =>
-            console.error('Session start error:', err)
+            logger.error('Session start error:', err)
         );
 
         return reply.status(201).send({

@@ -1,4 +1,5 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
+import { logger } from '../utils/logger';
 import { prisma } from '../config/prisma';
 import { midtransService } from '../services/midtransService';
 
@@ -11,7 +12,7 @@ export const billingController = {
             });
             return reply.send({ data: plans });
         } catch (error) {
-            console.error('Failed to get subscription plans:', error);
+            logger.error('Failed to get subscription plans:', error);
             return reply.code(500).send({ message: 'Internal Server Error' });
         }
     },
@@ -102,7 +103,7 @@ export const billingController = {
                 transactionId: transaction.id
             });
         } catch (error) {
-            console.error('Failed to checkout:', error);
+            logger.error('Failed to checkout:', error);
             return reply.code(500).send({ message: 'Internal Server Error' });
         }
     },
@@ -135,7 +136,7 @@ export const billingController = {
                 }
             });
         } catch (error) {
-            console.error('Failed to get billing info:', error);
+            logger.error('Failed to get billing info:', error);
             return reply.code(500).send({ message: 'Internal Server Error' });
         }
     },
@@ -153,11 +154,11 @@ export const billingController = {
             const transactionStatus = statusResponse.transaction_status;
             const fraudStatus = statusResponse.fraud_status;
 
-            console.log(`[Midtrans Webhook] Transaction ${orderId} received. Status: ${transactionStatus}, Fraud: ${fraudStatus}`);
+            logger.info(`[Midtrans Webhook] Transaction ${orderId} received. Status: ${transactionStatus}, Fraud: ${fraudStatus}`);
 
             const transactionDb = await prisma.paymentTransaction.findUnique({ where: { id: orderId } });
             if (!transactionDb) {
-                console.warn(`[Midtrans Webhook] Transaction ID ${orderId} not found in database.`);
+                logger.warn(`[Midtrans Webhook] Transaction ID ${orderId} not found in database.`);
                 return reply.code(404).send('Transaction not found');
             }
 
@@ -209,14 +210,14 @@ export const billingController = {
                         }
                     });
 
-                    console.log(`[Billing] User ${transactionDb.userId} plan activated to ${transactionDb.planId}`);
+                    logger.info(`[Billing] User ${transactionDb.userId} plan activated to ${transactionDb.planId}`);
                 }
             }
 
             // Kembalikan Http 200 supaya midtrans tidak retry
             return reply.send({ status: 'ok' });
         } catch (error) {
-            console.error('[Midtrans Webhook] Error processing notification:', error);
+            logger.error('[Midtrans Webhook] Error processing notification:', error);
             // Tetap reply ok atau 500 tergantung preferensi.
             // Jika 500, midtrans akan retry push webhook-nya.
             return reply.code(500).send({ message: 'Internal Server Error' });

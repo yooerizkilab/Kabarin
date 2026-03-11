@@ -1,5 +1,6 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { prisma } from '../config/prisma';
+import { logger } from '../utils/logger';
 
 // Konfigurasi Default Plan jika User belum langganan (Free Tier)
 const DEFAULT_FREE_PLAN = {
@@ -37,7 +38,7 @@ export const quotaMiddleware = {
                 return reply.code(403).send({ message: `Quota Exceeded: You have reached the maximum device limit (${maxDevices}) for your plan.` });
             }
         } catch (error) {
-            console.error('Device quota check error:', error);
+            logger.error('Device quota check error:', error);
             return reply.code(500).send({ message: 'Internal Server Error' });
         }
     },
@@ -83,7 +84,7 @@ export const quotaMiddleware = {
             // Catatan: increment messagesSentThisMonth harus dilakukan di Controller 
             // seteleh pesan "BENAR-BENAR" dikirimkan atau dijadwalkan.
         } catch (error) {
-            console.error('Message quota check error:', error);
+            logger.error('Message quota check error:', error);
             return reply.code(500).send({ message: 'Internal Server Error' });
         }
     }

@@ -1,4 +1,5 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
+import { logger } from '../utils/logger';
 import { webhookRepository } from '../repositories/webhookRepository';
 
 export const webhookController = {
@@ -8,7 +9,7 @@ export const webhookController = {
             const webhooks = await webhookRepository.findAllByUserId(userId);
             return reply.send({ data: webhooks });
         } catch (error) {
-            console.error('Failed to list webhooks:', error);
+            logger.error('Failed to list webhooks:', error);
             return reply.code(500).send({ message: 'Internal Server Error' });
         }
     },
@@ -42,7 +43,7 @@ export const webhookController = {
 
             return reply.code(201).send({ message: 'Webhook created successfully', data: webhook });
         } catch (error) {
-            console.error('Failed to create webhook:', error);
+            logger.error('Failed to create webhook:', error);
             return reply.code(500).send({ message: 'Internal Server Error' });
         }
     },
@@ -76,7 +77,7 @@ export const webhookController = {
             const webhook = await webhookRepository.update(id, payload);
             return reply.send({ message: 'Webhook updated successfully', data: webhook });
         } catch (error) {
-            console.error('Failed to update webhook:', error);
+            logger.error('Failed to update webhook:', error);
             return reply.code(500).send({ message: 'Internal Server Error' });
         }
     },
@@ -98,7 +99,7 @@ export const webhookController = {
             await webhookRepository.delete(id);
             return reply.send({ message: 'Webhook deleted successfully' });
         } catch (error) {
-            console.error('Failed to delete webhook:', error);
+            logger.error('Failed to delete webhook:', error);
             return reply.code(500).send({ message: 'Internal Server Error' });
         }
     }

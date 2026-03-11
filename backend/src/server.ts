@@ -30,16 +30,11 @@ import { wsServer } from './websocket/wsServer';
 import { sessionManager } from './baileys/sessionManager';
 import { prisma } from './config/prisma';
 import { startBlastWorker } from './workers/blastWorker';
+import { logger } from './utils/logger';
 
 async function buildServer() {
     const fastify = Fastify({
-        logger: {
-            level: env.NODE_ENV === 'development' ? 'info' : 'warn',
-            transport:
-                env.NODE_ENV === 'development'
-                    ? { target: 'pino-pretty', options: { colorize: true } }
-                    : undefined,
-        },
+        logger: false,
     });
 
     // ── Plugins ──────────────────────────────────────────────
@@ -120,25 +115,25 @@ async function start() {
         await fastify.listen({ port: env.PORT, host: env.HOST });
 
         // ── WebSocket ──────────────────────────────────────────
-        fastify.log.info(`WebSocket server ready at /ws`);
+        logger.info(`WebSocket server ready at /ws`);
 
         // ── Restore active WhatsApp sessions ──────────────────
         await sessionManager.restoreAllSessions();
-        fastify.log.info(`WhatsApp sessions restored`);
+        logger.info(`WhatsApp sessions restored`);
 
         // ── Start Blast Worker ────────────────────────────────
         await startBlastWorker();
-        fastify.log.info(`Blast worker started`);
+        logger.info(`Blast worker started`);
 
-        fastify.log.info(`Server running at http://${env.HOST}:${env.PORT}`);
+        logger.info(`Server running at http://${env.HOST}:${env.PORT}`);
     } catch (err) {
-        fastify.log.error(err);
+        logger.error('Failed to start server:', err);
         process.exit(1);
     }
 
     // ── Graceful shutdown ─────────────────────────────────────
     const shutdown = async () => {
-        fastify.log.info('Shutting down gracefully...');
+        logger.info('Shutting down gracefully...');
         await prisma.$disconnect();
         await fastify.close();
         process.exit(0);

@@ -1,6 +1,7 @@
 import OpenAI from 'openai';
 import Anthropic from '@anthropic-ai/sdk';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { logger } from '../utils/logger';
 
 /**
  * Call an AI provider with the given message and return the text response.
@@ -11,7 +12,7 @@ export async function callAI(
     systemPrompt: string,
     userMessage: string
 ): Promise<string> {
-    // console.log(`[AI] Calling provider: ${provider}, model: ${model}`);
+    // logger.debug(`[AI] Calling provider: ${provider}, model: ${model}`);
     switch (provider.toLowerCase()) {
         case 'openai':
             return callOpenAI(model, systemPrompt, userMessage);
@@ -40,10 +41,10 @@ async function callOpenAI(model: string, systemPrompt: string, userMessage: stri
         });
 
         const reply = response.choices[0]?.message?.content?.trim() || 'Sorry, I could not generate a response.';
-        // console.log(`[AI] OpenAI replied successfully.`);
+        // logger.debug(`[AI] OpenAI replied successfully.`);
         return reply;
     } catch (error: any) {
-        console.error(`[AI] OpenAI Error:`, error.message);
+        logger.error(`[AI] OpenAI Error:`, error.message);
         throw error;
     }
 }
@@ -63,12 +64,12 @@ async function callAnthropic(model: string, systemPrompt: string, userMessage: s
 
         const block = response.content[0];
         if (block.type === 'text') {
-            // console.log(`[AI] Anthropic replied successfully.`);
+            // logger.debug(`[AI] Anthropic replied successfully.`);
             return block.text.trim();
         }
         return 'Sorry, I could not generate a response.';
     } catch (error: any) {
-        console.error(`[AI] Anthropic Error:`, error.message);
+        logger.error(`[AI] Anthropic Error:`, error.message);
         throw error;
     }
 }
@@ -78,7 +79,7 @@ async function callGemini(model: string, systemPrompt: string, userMessage: stri
     if (!apiKey) throw new Error('GEMINI_API_KEY is not set in environment variables');
 
     try {
-        // console.log(`[AI] Gemini target model: ${model || 'gemini-flash-latest'}`);
+        // logger.debug(`[AI] Gemini target model: ${model || 'gemini-flash-latest'}`);
         const genAI = new GoogleGenerativeAI(apiKey);
         const geminiModel = genAI.getGenerativeModel({
             model: model || 'gemini-flash-latest',
@@ -87,10 +88,10 @@ async function callGemini(model: string, systemPrompt: string, userMessage: stri
 
         const result = await geminiModel.generateContent(userMessage);
         const reply = result.response.text().trim() || 'Sorry, I could not generate a response.';
-        // console.log(`[AI] Gemini replied successfully.`);
+        // logger.debug(`[AI] Gemini replied successfully.`);
         return reply;
     } catch (error: any) {
-        console.error(`[AI] Gemini Error:`, error.message);
+        logger.error(`[AI] Gemini Error:`, error.message);
         throw error;
     }
 }
