@@ -109,14 +109,14 @@ export default function TeamPage() {
 
     return (
         <div className="space-y-6">
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-white">Team Management</h1>
-                    <p className="text-gray-400">Manage your CS sub-accounts and permissions</p>
+                    <h1 className="text-xl sm:text-2xl font-bold text-white">Team Management</h1>
+                    <p className="text-xs sm:text-sm text-gray-400">Manage your CS sub-accounts and permissions</p>
                 </div>
                 <button 
                     onClick={() => { resetForm(); setEditingAgent(null); setShowModal(true); }}
-                    className="btn-primary"
+                    className="btn-primary w-full sm:w-auto justify-center"
                 >
                     + Add Member
                 </button>
@@ -135,7 +135,7 @@ export default function TeamPage() {
                             <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-xl">
                                 {agent.name[0].toUpperCase()}
                             </div>
-                            <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div className="flex gap-2 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
                                 <button onClick={() => handleEdit(agent)} className="p-2 hover:bg-white/10 rounded-lg text-blue-400">
                                     ✏️
                                 </button>
@@ -150,11 +150,14 @@ export default function TeamPage() {
                         <div className="space-y-2 border-t border-white/5 pt-4">
                             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Permissions</p>
                             <div className="flex flex-wrap gap-2">
-                                {Object.entries(agent.permissions || {}).map(([key, val]) => val && (
-                                    <span key={key} className="px-2 py-1 rounded bg-white/5 text-[10px] text-gray-300">
-                                        {key.replace('can', '').replace(/([A-Z])/g, ' $1').trim()}
-                                    </span>
-                                ))}
+                                {Object.entries(agent.permissions || {})
+                                    .filter(([_, val]) => !!val)
+                                    .map(([key]) => (
+                                        <span key={key} className="px-2 py-1 rounded bg-white/5 text-[10px] text-gray-300">
+                                            {key.replace('can', '').replace(/([A-Z])/g, ' $1').trim()}
+                                        </span>
+                                    ))
+                                }
                             </div>
                         </div>
                     </div>

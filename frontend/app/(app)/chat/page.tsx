@@ -133,11 +133,11 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-140px)]">
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-bold text-white">Live Chat Inbox</h1>
+    <div className="flex flex-col h-[calc(100vh-120px)] sm:h-[calc(100vh-160px)]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
+        <h1 className="text-xl sm:text-2xl font-bold text-white shrink-0">Live Chat Inbox</h1>
         <select 
-          className="input max-w-xs"
+          className="input max-w-full sm:max-w-xs text-sm"
           value={selectedDeviceId}
           onChange={(e) => setSelectedDeviceId(e.target.value)}
         >
@@ -147,9 +147,9 @@ export default function ChatPage() {
         </select>
       </div>
 
-      <div className="flex-1 flex bg-gray-900 rounded-2xl border border-gray-800 overflow-hidden">
-        {/* Sidebar */}
-        <div className="w-80 border-r border-gray-800 flex flex-col">
+      <div className="flex-1 flex bg-gray-900 rounded-2xl border border-gray-800 overflow-hidden relative">
+        {/* Sidebar (Chat List) */}
+        <div className={`w-full md:w-80 border-r border-gray-800 flex flex-col ${selectedChat ? 'hidden md:flex' : 'flex'}`}>
           <div className="p-4 border-b border-gray-800">
             <input type="text" placeholder="Search chats..." className="input text-sm w-full" />
           </div>
@@ -167,7 +167,7 @@ export default function ChatPage() {
                     key={idx}
                     onClick={() => setSelectedChat(phone)}
                     className={`w-full p-4 flex items-start gap-3 transition-colors text-left border-b border-gray-800/50 ${
-                      active ? 'bg-brand-600/20 border-r-4 border-r-brand-500' : 'hover:bg-gray-800'
+                      active ? 'bg-brand-600/20 md:border-r-4 md:border-r-brand-500' : 'hover:bg-gray-800'
                     }`}
                   >
                     <div className="w-10 h-10 rounded-full bg-gray-700 flex-shrink-0 flex items-center justify-center font-bold">
@@ -188,17 +188,25 @@ export default function ChatPage() {
         </div>
 
         {/* Chat Window */}
-        <div className="flex-1 flex flex-col bg-[#0b141a]">
+        <div className={`flex-1 flex flex-col bg-[#0b141a] ${!selectedChat ? 'hidden md:flex' : 'flex'}`}>
           {selectedChat ? (
             <>
               {/* Header */}
-              <div className="p-3 px-6 bg-gray-800/50 border-b border-gray-800 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center font-bold">
+              <div className="p-3 px-4 sm:px-6 bg-gray-800/50 border-b border-gray-800 flex items-center justify-between">
+                <div className="flex items-center gap-3 min-w-0">
+                  <button 
+                    onClick={() => setSelectedChat(null)}
+                    className="md:hidden p-2 -ml-2 text-gray-400 hover:text-white"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                  </button>
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-700 flex-shrink-0 flex items-center justify-center font-bold text-xs sm:text-base">
                     {selectedChat[0]}
                   </div>
-                  <div>
-                    <h3 className="text-white font-medium text-sm">{selectedChat}</h3>
+                  <div className="min-w-0">
+                    <h3 className="text-white font-medium text-sm truncate">{selectedChat}</h3>
                     <p className="text-[10px] text-brand-400">Online</p>
                   </div>
                 </div>
@@ -207,7 +215,7 @@ export default function ChatPage() {
               {/* Messages */}
               <div 
                 ref={scrollRef}
-                className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar relative"
+                className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 custom-scrollbar relative"
               >
                 {/* Background Pattern Overlay */}
                 <div 
@@ -219,10 +227,10 @@ export default function ChatPage() {
                     const isMe = msg.direction === 'OUTGOING';
                     return (
                       <div key={idx} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
-                        <div className={`max-w-[70%] rounded-xl px-4 py-2 text-sm shadow-sm ${
+                        <div className={`max-w-[85%] sm:max-w-[70%] rounded-xl px-4 py-2 text-sm shadow-sm ${
                           isMe ? 'bg-brand-700 text-white rounded-tr-none' : 'bg-gray-800 text-gray-200 rounded-tl-none'
                         }`}>
-                          <p>{msg.content}</p>
+                          <p className="break-words">{msg.content}</p>
                           <div className={`text-[10px] mt-1 flex justify-end gap-1 ${isMe ? 'text-brand-200' : 'text-gray-500'}`}>
                             {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                             {isMe && <span>✓✓</span>}
@@ -235,11 +243,11 @@ export default function ChatPage() {
               </div>
 
               {/* Input */}
-              <form onSubmit={handleSend} className="p-4 bg-gray-800/50 border-t border-gray-800 flex items-center gap-3">
+              <form onSubmit={handleSend} className="p-3 sm:p-4 bg-gray-800/50 border-t border-gray-800 flex items-center gap-2 sm:gap-3">
                 <input
                   type="text"
                   placeholder="Type a message..."
-                  className="flex-1 bg-gray-800 border-none rounded-xl px-4 py-3 text-sm text-white focus:ring-1 focus:ring-brand-500 transition-all"
+                  className="flex-1 bg-gray-800 border-none rounded-xl px-4 py-2.5 sm:py-3 text-sm text-white focus:ring-1 focus:ring-brand-500 transition-all"
                   value={inputText}
                   onChange={(e) => setInputText(e.target.value)}
                   disabled={sending}
@@ -247,17 +255,17 @@ export default function ChatPage() {
                 <button 
                   type="submit"
                   disabled={sending || !inputText.trim()}
-                  className="w-12 h-12 rounded-full bg-brand-600 flex items-center justify-center hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:grayscale"
+                  className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-brand-600 flex-shrink-0 flex items-center justify-center hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:grayscale"
                 >
-                  <span className="text-xl rotate-45 -mt-1 -ml-1">✈️</span>
+                  <span className="text-lg sm:text-xl rotate-45 -mt-1 -ml-1">✈️</span>
                 </button>
               </form>
             </>
           ) : (
-            <div className="flex-1 flex flex-col items-center justify-center text-gray-500">
-              <span className="text-6xl mb-4">💬</span>
-              <p className="text-lg font-medium">Select a chat to start messaging</p>
-              <p className="text-sm opacity-50">Choose a contact from the left sidebar</p>
+            <div className="flex-1 flex flex-col items-center justify-center text-gray-500 p-4 text-center">
+              <span className="text-5xl sm:text-6xl mb-4">💬</span>
+              <p className="text-base sm:text-lg font-medium">Select a chat to start messaging</p>
+              <p className="text-xs sm:text-sm opacity-50">Choose a contact from the left sidebar</p>
             </div>
           )}
         </div>

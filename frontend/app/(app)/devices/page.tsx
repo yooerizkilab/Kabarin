@@ -68,7 +68,7 @@ export default function DevicesPage() {
       {/* Add device */}
       <div className="card">
         <h2 className="section-title mb-4">Connect New Device</h2>
-        <div className="flex gap-3">
+        <div className="flex flex-col sm:flex-row gap-3">
           <input
             className="input flex-1"
             placeholder="Device name (e.g. Marketing Phone)"
@@ -76,7 +76,7 @@ export default function DevicesPage() {
             onChange={(e) => setNewDeviceName(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleConnect()}
           />
-          <button className="btn-primary" onClick={handleConnect} disabled={connecting}>
+          <button className="btn-primary w-full sm:w-auto" onClick={handleConnect} disabled={connecting}>
             {connecting ? 'Connecting…' : 'Connect'}
           </button>
         </div>
@@ -92,36 +92,36 @@ export default function DevicesPage() {
         ) : (
           <div className="space-y-3">
             {devices.map((d) => (
-              <div
-                key={d.id}
-                className="flex items-center justify-between p-4 bg-gray-800 rounded-xl"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-gray-700 flex items-center justify-center text-xl">
-                    📱
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-gray-800 rounded-xl gap-4">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-gray-700 flex-shrink-0 flex items-center justify-center text-xl">
+                      📱
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-medium text-white truncate">{d.name}</p>
+                      <p className="text-sm text-gray-400 truncate">
+                        {d.phoneNumber ? `+${d.phoneNumber}` : 'Not linked'}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-medium text-white">{d.name}</p>
-                    <p className="text-sm text-gray-400">
-                      {d.phoneNumber ? `+${d.phoneNumber}` : 'Not linked'}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className={statusBadge(d.status)}>{d.status.replace('_', ' ')}</span>
-                  {(d.status === 'QR_REQUIRED' || d.status === 'CONNECTING') && (
-                    <button
-                      onClick={() => setQrDeviceId(d.id)}
-                      className="btn-secondary text-sm"
+                  <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+                    <span className={`${statusBadge(d.status)} text-[10px] sm:text-xs`}>{d.status.replace('_', ' ')}</span>
+                    {(d.status === 'QR_REQUIRED' || d.status === 'CONNECTING') && (
+                      <button
+                        onClick={() => setQrDeviceId(d.id)}
+                        className="btn-secondary text-xs sm:text-sm py-1.5 sm:py-2"
+                      >
+                        Show QR
+                      </button>
+                    )}
+                    <button 
+                      onClick={() => handleDelete(d.id)} 
+                      className="btn-danger text-xs sm:text-sm py-1.5 sm:py-2"
                     >
-                      Show QR
+                      Remove
                     </button>
-                  )}
-                  <button onClick={() => handleDelete(d.id)} className="btn-danger text-sm">
-                    Remove
-                  </button>
+                  </div>
                 </div>
-              </div>
             ))}
           </div>
         )}

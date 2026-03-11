@@ -175,17 +175,18 @@ export default function AutoResponderDetailPage() {
 
       {/* Header */}
       <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 mb-6">
-        <div className="flex items-start justify-between">
-          <div>
-            <h1 className="text-xl font-bold text-white">{ar.name}</h1>
-            <p className="text-sm text-gray-500 mt-1">
-              📱 {ar.device.name} {ar.device.phoneNumber && `· ${ar.device.phoneNumber}`}
-              <span className={`ml-2 px-1.5 py-0.5 rounded text-xs font-medium ${ar.device.status === 'CONNECTED' ? 'bg-green-900/50 text-green-400' : 'bg-gray-800 text-gray-500'}`}>
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+          <div className="min-w-0">
+            <h1 className="text-xl font-bold text-white truncate">{ar.name}</h1>
+            <p className="text-xs sm:text-sm text-gray-500 mt-1 flex flex-wrap items-center gap-2">
+              <span>📱 {ar.device.name}</span>
+              {ar.device.phoneNumber && <span>· {ar.device.phoneNumber}</span>}
+              <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${ar.device.status === 'CONNECTED' ? 'bg-green-900/50 text-green-400' : 'bg-gray-800 text-gray-500'}`}>
                 {ar.device.status}
               </span>
             </p>
           </div>
-          <div className="flex items-center gap-2 text-sm text-gray-400">
+          <div className="flex items-center gap-2 text-sm text-gray-400 self-start sm:self-auto pt-2 sm:pt-0 border-t sm:border-0 border-gray-800 w-full sm:w-auto">
             <div className={`w-2 h-2 rounded-full ${ar.isActive ? 'bg-green-400' : 'bg-gray-600'}`} />
             {ar.isActive ? 'Aktif' : 'Nonaktif'}
           </div>
@@ -215,11 +216,11 @@ export default function AutoResponderDetailPage() {
       {/* ── Tab: Keywords ─────────────────────────────────── */}
       {tab === 'keywords' && (
         <div>
-          <div className="flex items-center justify-between mb-4">
-            <p className="text-sm text-gray-400">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
+            <p className="text-xs sm:text-sm text-gray-400">
               Pesan yang cocok dengan keyword akan dibalas otomatis. Diproses berdasarkan urutan.
             </p>
-            <button onClick={openCreateRule} className="btn-primary text-sm whitespace-nowrap ml-4">
+            <button onClick={openCreateRule} className="btn-primary text-sm whitespace-nowrap w-full sm:w-auto justify-center">
               + Tambah Rule
             </button>
           </div>
@@ -232,35 +233,41 @@ export default function AutoResponderDetailPage() {
             <div className="space-y-3">
               {ar.rules.map((rule, i) => (
                 <div key={rule.id} className={`bg-gray-900 border rounded-xl p-4 transition-all ${rule.isActive ? 'border-gray-700' : 'border-gray-800 opacity-60'}`}>
-                  <div className="flex items-start gap-3">
-                    <span className="w-6 h-6 rounded-full bg-gray-800 text-gray-400 text-xs flex items-center justify-center flex-shrink-0 mt-0.5">
-                      {i + 1}
-                    </span>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        {rule.keywords.split(',').map((kw, ki) => (
-                          <span key={ki} className="px-2 py-0.5 rounded bg-brand-900/60 border border-brand-800 text-brand-300 text-xs font-mono">
-                            {kw.trim()}
+                  <div className="flex flex-col sm:flex-row sm:items-start gap-4">
+                    <div className="flex items-start gap-3 flex-1 min-w-0">
+                      <span className="w-6 h-6 rounded-full bg-gray-800 text-gray-400 text-[10px] flex items-center justify-center flex-shrink-0 mt-0.5 font-bold">
+                        {i + 1}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap mb-2">
+                          {rule.keywords.split(',').map((kw, ki) => (
+                            <span key={ki} className="px-2 py-0.5 rounded bg-brand-900/60 border border-brand-800 text-brand-300 text-[10px] sm:text-xs font-mono">
+                              {kw.trim()}
+                            </span>
+                          ))}
+                          <span className="px-2 py-0.5 rounded bg-gray-800 text-gray-400 text-[10px] sm:text-xs">
+                            {rule.matchType}
                           </span>
-                        ))}
-                        <span className="px-2 py-0.5 rounded bg-gray-800 text-gray-400 text-xs">
-                          {rule.matchType}
-                        </span>
+                        </div>
+                        <p className="text-sm text-gray-300 whitespace-pre-wrap">{rule.response}</p>
                       </div>
-                      <p className="text-sm text-gray-300 mt-2 whitespace-pre-wrap">{rule.response}</p>
                     </div>
-                    <div className="flex items-center gap-2 flex-shrink-0">
+                    
+                    <div className="flex items-center justify-between sm:justify-end gap-3 pt-3 sm:pt-0 border-t sm:border-0 border-gray-800">
+                      <div className="flex items-center gap-1">
+                        <button onClick={() => openEditRule(rule)} className="text-xs text-gray-400 hover:text-white px-2 py-1.5 rounded hover:bg-gray-800">
+                          Edit
+                        </button>
+                        <button onClick={() => deleteRule(rule)} className="text-xs text-red-500 hover:text-red-300 px-2 py-1.5 rounded hover:bg-red-900/30">
+                          Hapus
+                        </button>
+                      </div>
+                      
                       <button
                         onClick={() => toggleRule(rule)}
                         className={`w-9 h-5 rounded-full transition-colors flex-shrink-0 relative ${rule.isActive ? 'bg-brand-600' : 'bg-gray-700'}`}
                       >
                         <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${rule.isActive ? 'left-[18px]' : 'left-0.5'}`} />
-                      </button>
-                      <button onClick={() => openEditRule(rule)} className="text-xs text-gray-400 hover:text-white px-2 py-1 rounded hover:bg-gray-800">
-                        Edit
-                      </button>
-                      <button onClick={() => deleteRule(rule)} className="text-xs text-red-500 hover:text-red-300 px-2 py-1 rounded hover:bg-red-900/30">
-                        Hapus
                       </button>
                     </div>
                   </div>

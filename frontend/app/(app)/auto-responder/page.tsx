@@ -96,16 +96,16 @@ export default function AutoResponderPage() {
   return (
     <div className="max-w-4xl mx-auto">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white">🤖 Auto-Responder</h1>
-          <p className="text-sm text-gray-400 mt-1">
+          <h1 className="text-xl sm:text-2xl font-bold text-white">🤖 Auto-Responder</h1>
+          <p className="text-xs sm:text-sm text-gray-400 mt-1">
             Balas pesan masuk secara otomatis dengan keyword rules atau AI
           </p>
         </div>
         <button
           onClick={() => setShowCreate(true)}
-          className="btn-primary"
+          className="btn-primary w-full sm:w-auto justify-center"
           disabled={availableDevices.length === 0}
         >
           + Buat Auto-Responder
@@ -182,37 +182,54 @@ export default function AutoResponderPage() {
           {autoResponders.map((ar) => (
             <div
               key={ar.id}
-              className="bg-gray-900 border border-gray-800 rounded-2xl p-5 flex items-center gap-4 hover:border-gray-700 transition-colors"
+              className="bg-gray-900 border border-gray-800 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-4 hover:border-gray-700 transition-colors"
             >
-              {/* Status dot */}
-              <div
-                className={`w-3 h-3 rounded-full flex-shrink-0 ${ar.isActive ? 'bg-green-400 shadow-lg shadow-green-400/40' : 'bg-gray-600'}`}
-              />
+              <div className="flex items-center gap-4 flex-1 min-w-0">
+                {/* Status dot */}
+                <div
+                  className={`w-3 h-3 rounded-full flex-shrink-0 ${ar.isActive ? 'bg-green-400 shadow-lg shadow-green-400/40' : 'bg-gray-600'}`}
+                />
 
-              {/* Info */}
-              <div className="flex-1 min-w-0">
-                <p className="font-semibold text-white">{ar.name}</p>
-                <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
-                  <span>📱 {ar.device?.name || ar.deviceId}</span>
-                  {ar.device?.phoneNumber && <span>{ar.device.phoneNumber}</span>}
-                  <span
-                    className={`px-1.5 py-0.5 rounded font-medium ${ar.device?.status === 'CONNECTED' ? 'bg-green-900/50 text-green-400' : 'bg-gray-800 text-gray-500'}`}
-                  >
-                    {ar.device?.status}
-                  </span>
-                </div>
-                <div className="flex items-center gap-3 mt-1.5 text-xs text-gray-500">
-                  <span>📋 {ar.rules.length} keyword rule{ar.rules.length !== 1 ? 's' : ''}</span>
-                  {ar.aiProvider && (
-                    <span className="px-2 py-0.5 rounded-full bg-brand-900/50 text-brand-400 border border-brand-800">
-                      ✨ AI: {AI_PROVIDER_LABELS[ar.aiProvider] || ar.aiProvider}
+                {/* Info */}
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-white truncate">{ar.name}</p>
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-[10px] sm:text-xs text-gray-500">
+                    <span className="flex items-center gap-1">📱 {ar.device?.name || ar.deviceId}</span>
+                    {ar.device?.phoneNumber && <span>{ar.device.phoneNumber}</span>}
+                    <span
+                      className={`px-1.5 py-0.5 rounded font-medium ${ar.device?.status === 'CONNECTED' ? 'bg-green-900/50 text-green-400' : 'bg-gray-800 text-gray-500'}`}
+                    >
+                      {ar.device?.status}
                     </span>
-                  )}
+                  </div>
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5 text-[10px] sm:text-xs text-gray-500">
+                    <span>📋 {ar.rules.length} keyword rule{ar.rules.length !== 1 ? 's' : ''}</span>
+                    {ar.aiProvider && (
+                      <span className="px-2 py-0.5 rounded-full bg-brand-900/50 text-brand-400 border border-brand-800 whitespace-nowrap">
+                        ✨ AI: {AI_PROVIDER_LABELS[ar.aiProvider] || ar.aiProvider}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
 
               {/* Actions */}
-              <div className="flex items-center gap-2 flex-shrink-0">
+              <div className="flex items-center justify-between sm:justify-end gap-2 pt-3 sm:pt-0 border-t border-gray-800 sm:border-0">
+                <div className="flex items-center gap-2">
+                  <Link
+                    href={`/auto-responder/${ar.id}`}
+                    className="px-3 py-1.5 text-xs font-medium rounded-lg bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
+                  >
+                    Kelola →
+                  </Link>
+                  <button
+                    onClick={() => handleDelete(ar.id)}
+                    className="px-3 py-1.5 text-xs font-medium rounded-lg bg-gray-800 text-red-400 hover:bg-red-900/40 hover:text-red-300 transition-colors"
+                  >
+                    Hapus
+                  </button>
+                </div>
+
                 {/* Toggle */}
                 <button
                   onClick={() => handleToggle(ar)}
@@ -222,20 +239,6 @@ export default function AutoResponderPage() {
                   <span
                     className={`inline-block h-4 w-4 rounded-full bg-white shadow transform transition-transform ${ar.isActive ? 'translate-x-6' : 'translate-x-1'}`}
                   />
-                </button>
-
-                <Link
-                  href={`/auto-responder/${ar.id}`}
-                  className="px-3 py-1.5 text-xs font-medium rounded-lg bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
-                >
-                  Kelola →
-                </Link>
-
-                <button
-                  onClick={() => handleDelete(ar.id)}
-                  className="px-3 py-1.5 text-xs font-medium rounded-lg bg-gray-800 text-red-400 hover:bg-red-900/40 hover:text-red-300 transition-colors"
-                >
-                  Hapus
                 </button>
               </div>
             </div>

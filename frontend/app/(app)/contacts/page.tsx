@@ -84,9 +84,9 @@ export default function ContactsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="page-title">Contacts</h1>
-        <p className="text-gray-400 mt-1">Manage your contact directory and groups</p>
+      <div className="pb-2">
+        <h1 className="text-xl sm:text-2xl font-bold text-white">Contacts</h1>
+        <p className="text-xs sm:text-sm text-gray-400 mt-1">Manage your contact directory and groups</p>
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">

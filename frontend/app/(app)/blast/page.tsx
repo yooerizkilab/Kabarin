@@ -124,13 +124,13 @@ export default function BlastPage() {
           {form.type !== 'TEXT' && (
             <div>
               <label className="label">Media URL</label>
-              <div className="flex gap-2">
-                  <input className="input" placeholder="https://..." value={form.mediaUrl}
+              <div className="flex flex-col sm:flex-row gap-2">
+                  <input className="input flex-1" placeholder="https://..." value={form.mediaUrl}
                     onChange={(e) => setForm({ ...form, mediaUrl: e.target.value })} />
                   <button 
                       type="button"
                       onClick={() => setShowMediaSelector(true)}
-                      className="btn-secondary !text-xs whitespace-nowrap"
+                      className="btn-secondary !text-xs whitespace-nowrap justify-center"
                   >
                       📁 Library
                   </button>
@@ -183,15 +183,16 @@ export default function BlastPage() {
           ) : (
             <div className="space-y-3">
               {jobs.map((j) => (
-                <div key={j.id} className="p-3 bg-gray-800 rounded-lg">
-                  <div className="flex justify-between">
-                    <p className="font-medium text-white text-sm">{j.name}</p>
-                    <span className={`text-xs font-medium ${statusColor[j.status]}`}>{j.status}</span>
+                <div key={j.id} className="p-4 bg-gray-800 rounded-xl border border-gray-700/50">
+                  <div className="flex justify-between items-start gap-2">
+                    <p className="font-bold text-white text-sm sm:text-base leading-tight truncate">{j.name}</p>
+                    <span className={`text-[10px] sm:text-xs font-bold uppercase tracking-wider ${statusColor[j.status]}`}>{j.status}</span>
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">
-                    {j.device?.name} · {j._count?.recipients ?? 0} recipients ·{' '}
-                    {format(new Date(j.createdAt), 'dd MMM, HH:mm')}
-                  </p>
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-[10px] sm:text-xs text-gray-500">
+                    <span className="flex items-center gap-1">📱 {j.device?.name}</span>
+                    <span>👥 {j._count?.recipients ?? 0} recipients</span>
+                    <span>📅 {format(new Date(j.createdAt), 'dd MMM, HH:mm')}</span>
+                  </div>
                 </div>
               ))}
             </div>
