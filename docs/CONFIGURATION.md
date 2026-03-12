@@ -1,48 +1,40 @@
-# Konfigurasi Environment (`.env`)
+# ⚙️ Konfigurasi Sistem
 
-Bagian ini menjelaskan detail konfigurasi environment yang diperlukan untuk menjalankan sistem.
+Seluruh pengaturan sistem dikelola melalui file Environment Variables (`.env`).
 
-## Konfigurasi Backend (`backend/.env`)
+## 🖥️ Backend (`backend/.env`)
 
-Silakan sesuaikan isi file `.env` di dalam folder `backend`:
+| Variabel | Deskripsi | Default |
+| :--- | :--- | :--- |
+| `DATABASE_URL` | Koneksi MySQL (Prisma) | `mysql://root:password@localhost:3306/db` |
+| `PORT` | Port server backend | `3001` |
+| `JWT_SECRET` | Kunci enkripsi autentikasi | `rahasia_jwt` |
+| `SESSION_DIR` | Folder penyimpanan sesi WA | `./sessions` |
+| `FRONTEND_URL` | URL Frontend untuk CORS | `http://localhost:3000` |
+| `GEMINI_API_KEY` | Key AI Google Gemini (Global) | - |
+| `OPENAI_API_KEY` | Key AI OpenAI GPT (Global) | - |
+| `ANTHROPIC_API_KEY` | Key AI Anthropic Claude (Global) | - |
 
-```env
-# Koneksi Database (Ubah root & password sesuai lokal PC Anda)
-DATABASE_URL="mysql://root:password@localhost:3306/whatsapp_gateway"
-
-# Port berjalannya API Backend
-PORT=3001
-
-# Rahasia JWT (Ganti dengan string acak)
-JWT_SECRET="rahasia_jwt_sangat_kuat_123"
-
-# Lokasi penyimpanan sesi cache WhatsApp (Local Folder)
-SESSION_DIR="./sessions"
-
-# Interval worker untuk mengecek DB (MiliDetik)
-WORKER_INTERVAL_MS=5000
-
-# Jeda waktu pengiriman antar pesan untuk menghindari Banned (MiliDetik)
-MESSAGE_DELAY_MS=3000
-
-# URL Frontend (Untuk keamanan CORS)
-FRONTEND_URL="http://localhost:3000"
-
-# AI API Keys (Default Global)
-OPENAI_API_KEY=sk-...
-ANTHROPIC_API_KEY=sk-ant-...
-GEMINI_API_KEY=AIza...
-
-# NOTE: API Keys di atas adalah nilai default global. 
-# Jika Anda mengisi API Key pada halaman pengaturan Auto-Responder di Dashboard, 
-# maka key khusus per-device tersebut akan digunakan menggantikan key di atas.
-```
+> [!IMPORTANT]
+> **Prioritas API Key**: Jika Anda mengisi API Key pada halaman **Auto-Responder Settings** di Dashboard, maka sistem akan menggunakan **Key Khusus Device** tersebut. API Key di `.env` hanya digunakan sebagai cadangan (Fallback) jika key di Dashboard kosong.
 
 ---
 
-## Konfigurasi Frontend (`frontend/.env.local`)
+## 🌐 Frontend (`frontend/.env.local`)
 
-```env
-NEXT_PUBLIC_API_URL=http://localhost:3001
-NEXT_PUBLIC_WS_URL=ws://localhost:3001
-```
+| Variabel | Deskripsi | Default |
+| :--- | :--- | :--- |
+| `NEXT_PUBLIC_API_URL` | Endpoint API Backend | `http://localhost:3001` |
+| `NEXT_PUBLIC_WS_URL` | Endpoint WebSocket | `ws://localhost:3001` |
+
+---
+
+## 🛡️ Best Practice
+
+1.  **JWT Secret**: Selalu gunakan string acak yang panjang dan rumit untuk produksi.
+2.  **MySQL Performance**: Gunakan MySQL v8.0+ untuk mendukung fitur indexing yang lebih modern.
+3.  **Quota Management**: Disarankan menggunakan API Key per-device untuk menghindari limit harian pada akun AI gratisan.
+
+---
+
+[🚀 Instalasi](INSTALLATION.md) | [🏠 Home](README.md) | [▶️ Menjalankan Sistem](RUNNING.md)

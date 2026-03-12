@@ -15,16 +15,44 @@ Model Prisma yang terlibat:
 - `Device`: Menyimpan data perangkat (Nama, Nomor Telepon, Status, Path Sesi).
 - Relasi: Satu `User` dapat memiliki banyak `Device`.
 
-## Alur Sistem Backend (`sessionManager.ts`)
+# 📱 Manajemen Device
 
-1. **Inisialisasi**: Saat aplikasi dimulai, `sessionManager` memuat semua sesi perangkat yang ada dari disk/database.
-2. **Koneksi Baru**:
-   - User membuat perangkat di dashboard.
-   - `sessionManager.createSession(deviceId)` dipanggil.
-   - Adapter _Baileys_ menginisialisasi socket koneksi.
-3. **QR Code**: Jika sesi belum terautorisasi, event `connection.update` akan menangkap QR code dan mengirimkannya ke frontend via WebSocket.
-4. **Update Status**: Status koneksi (`CONNECTED`, `DISCONNECTED`, dll) diperbarui di database setiap kali ada perubahan event dari WhatsApp.
+Sistem ini memungkinkan Anda mengelola banyak akun WhatsApp (Multi-Device) secara bersamaan dalam satu dashboard.
 
-## Penyimpanan Sesi
+## 🔗 Proses Koneksi
 
-Sesi disimpan dalam folder yang ditentukan oleh `.env` (default: `backend/sessions/`) atau sesuai konfigurasi `sessionPath` pada model `Device`.
+Sistem menggunakan library **Baileys** untuk mensimulasikan login WhatsApp Web yang sah.
+
+```mermaid
+graph TD
+    A[Klik Tambah Device] --> B[Generate QR Code]
+    B --> C[Scan dengan HP]
+    C --> D{Koneksi Berhasil?}
+    D -- Ya --> E[Sesi Disimpan]
+    D -- Tidak --> F[Ulangi Scan]
+    E --> G[Device Online]
+```
+
+---
+
+## ✨ Fitur Device
+
+-   **Multi-Account**: Hubungkan lebih dari satu nomor WhatsApp (tergantung paket langganan).
+-   **Status Monitoring**: Pantau apakah device sedang `CONNECTED`, `DISCONNECTED`, atau `INITIALIZING`.
+-   **Auto-Reconnect**: Sistem akan mencoba menghubungkan kembali secara otomatis jika terjadi gangguan jaringan ringan.
+-   **Session Data**: Data login disimpan dengan aman di folder `./sessions` (Backend).
+
+---
+
+## 📝 Langkah Menghubungkan Device
+
+1.  Masuk ke Dashboard -> menu **Devices**.
+2.  Klik tombol **Connect / Tambah Device**.
+3.  Berikan nama untuk identifikasi (misal: "CS Jakarta").
+4.  Tunggu QR Code muncul.
+5.  Buka WhatsApp di HP Anda -> Perangkat Tertaut -> Tautkan Perangkat.
+6.  Scan QR Code yang muncul di layar dashboard.
+
+---
+
+[🏠 Home](../README.md) | [🤖 Auto-Responder](AUTO_RESPONDER.md) | [🚀 Message Blast](BLAST.md)

@@ -1,54 +1,63 @@
-# Auto-Responder / Chatbot Builder
+# 🤖 Auto-Responder (Chatbot Builder)
 
-Fitur Auto-Responder memungkinkan _User_ untuk memberikan balasan pesan otomatis ke _Contact_ berdasarkan pesan masuk, tanpa perlu campur tangan admin secara langsung.
+Fitur Auto-Responder memungkinkan Anda memberikan balasan otomatis secara cerdas berdasarkan pesan yang masuk. Sistem ini bekerja dengan dua lapisan logika yang saling melengkapi.
 
-## Mode Operasi
+## 🔄 Alur Respon (Logic Flow)
 
-Fitur ini memiliki 2 lapis (_Layer_) respon:
+Sistem akan memproses setiap pesan masuk dengan urutan sebagai berikut:
 
-1.  **Keyword Rules (Lapisan 1)**
-    Sistem akan mengecek terlebih dahulu apakah pesan yang masuk mengandung Keyword yang telah ditentukan oleh Admin. Terdapat 4 tipe pencocokan (Match Type):
-    - **CONTAINS:** Pesan mengandung keyword di tengah, awal, atau akhir kalimat.
-    - **EXACT:** Pesan sama persis dengan keyword (hanya mengabaikan huruf besar/kecil).
-    - **STARTSWITH:** Pesan di awali dengan keyword tertentu (misal: "Halo").
-    - **REGEX:** Ekspresi Reguler lebih advance untuk menangkap pola kalimat.
-
-2.  **AI Fallback (Lapisan 2)**
-    Jika tidak ada satupun _Keyword Rule_ yang cocok, dan Admin mengaktifkan fitur AI, pesan akan diproses dan dibalas menggunakan _Artificial Intelligence_.
-    Provider AI yang didukung saat ini:
-    - OpenAI (GPT)
-    - Anthropic (Claude)
-    - Google Gemini
-
-## Struktur Database
-
-Model Prisma yang terlibat:
-
-- `AutoResponder`: Mewakili pengaturan master per-Device (Nama, Status Aktif, Provider AI, Prompt, API Key).
-- `AutoResponderRule`: Mewakili masing-masing keyword dan balasan terusan milik suatu AutoResponder (Relasi One-To-Many).
-
-## Multi-API Key Support
-
-Sistem mendukung penggunaan API Key yang berbeda untuk setiap device. Hal ini sangat berguna untuk:
-- Menghindari limit kuota harian pada _Free Tier_ provider AI (seperti Google Gemini).
-- Menggunakan akun AI yang berbeda-beda untuk tiap departemen/perangkat.
-
-Jika **API Key** diisi pada halaman pengaturan Auto-Responder device, sistem akan menggunakan key tersebut. Jika dikosongkan, sistem akan kembali (_fallback_) menggunakan API Key yang ada di file `.env` server.
-
-## Alur Sistem Backend (`sessionManager.ts`)
-
-1. Pada adapter _Baileys_ (`messages.upsert`), sistem memfilter pesan yang bertipe _notify_ (pesan masuk sesungguhnya).
-2. Sistem mengekstrak isi teks di payload, baik dari `conversation`, `extendedTextMessage`, atau _caption_ pada media gambar/video.
-3. Memanggil `handleAutoRespond(deviceId, from, text)`.
-4. Jika menemukan Rule cocok, balas pesan ke User dan _Bypass_ AI.
-5. Jika tidak ada Rule cocok, lempar ke AI, tunggu _response_, lalu kirim hasil balasan teks AI.
-
-## Konfigurasi Env
-
-Untuk menggunakan AI, set kunci rahasia (_API Keys_) pada file `backend/.env`:
-
-```env
-OPENAI_API_KEY=sk-...
-ANTHROPIC_API_KEY=sk-ant-...
-GEMINI_API_KEY=AIza...
+```mermaid
+graph TD
+    A[Pesan Masuk] --> B{Cek Keyword Rules}
+    B -- Cocok --> C[Kirim Balasan Keyword]
+    B -- Tidak Cocok --> D{AI Aktif?}
+    D -- Ya --> E[Kirim ke AI Provider]
+    E --> F[Kirim Balasan dari AI]
+    D -- Tidak --> G[Abaikan / Selesai]
 ```
+
+---
+
+## 📋 1. Keyword Rules (Lapisan Utama)
+
+Keyword rules adalah cara paling efisien untuk menjawab pertanyaan yang sering diajukan (FAQ). Anda dapat menentukan kata kunci tertentu dan balasan yang sesuai.
+
+### Match Types (Tipe Pencocokan):
+-   **CONTAINS**: Membalas jika pesan mengandung kata kunci (misal: "harga" akan membalas pesan "Berapa harganya?").
+-   **EXACT**: Membalas hanya jika pesan sama persis (misal: "P" untuk memulai bot).
+-   **STARTSWITH**: Membalas jika pesan diawali kata tertentu (misal: "Halo").
+-   **REGEX**: Pencocokan pola tingkat lanjut untuk pengembang.
+
+---
+
+## ✨ 2. AI Fallback (Lapisan Cerdas)
+
+Jika tidak ada keyword yang cocok, sistem dapat meneruskan pesan ke AI untuk memberikan jawaban yang lebih natural dan kontekstual.
+
+### Provider yang Didukung:
+-   **Google Gemini**: Direkomendasikan (Fast & Cost-effective).
+-   **OpenAI (GPT)**: Standar industri untuk akurasi tinggi.
+-   **Anthropic (Claude)**: Sangat baik untuk pemahaman konteks panjang.
+
+### 🔑 Per-Device API Keys (Fitur Unggulan)
+Anda dapat menentukan API Key yang berbeda untuk setiap perangkat WhatsApp. Ini memungkinkan Anda:
+1.  Membagi beban kuota antar akun.
+2.  Menghindari pemblokiran (Rate Limit) global.
+3.  Menggunakan model AI yang berbeda untuk departemen yang berbeda.
+
+> [!TIP]
+> Jika kolom API Key di Dashboard dikosongkan, sistem akan otomatis menggunakan Key default dari file `.env` server.
+
+---
+
+## ⚙️ Cara Konfigurasi
+
+1.  Buka menu **Auto-Responder**.
+2.  Pilih Device dan klik **Kelola**.
+3.  Pada tab **AI Settings**, pilih Provider dan Model yang diinginkan.
+4.  Tuliskan **System Prompt** untuk mengatur kepribadian bot (misal: "Kamu adalah asisten toko yang ramah...").
+5.  Aktifkan status Auto-Responder menjadi **On**.
+
+---
+
+[🏠 Home](../README.md) | [📱 Manajemen Device](DEVICES.md) | [🚀 Message Blast](BLAST.md)

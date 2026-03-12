@@ -1,28 +1,33 @@
-# Webhook Management
+# 🔌 Webhook Management
 
-Fitur Webhook memungkinkan sistem untuk meneruskan (_forward_) pesan masuk atau update status pesan ke server eksternal milik _User_ secara real-time melalui HTTP POST.
+Fitur Webhook memungkinkan sistem untuk meneruskan (_forward_) pesan masuk atau update status pesan ke server eksternal milik Anda secara real-time.
 
-## Fitur Utama
+## 🔄 Alur Kerja Webhook
 
-- **Real-time Forwarding**: Mengirim data segera setelah diterima dari WhatsApp.
-- **Security Secret**: Menggunakan token rahasia untuk memverifikasi bahwa request berasal dari server WA Gateway.
-- **Toggle Switch**: Mengaktifkan atau menonaktifkan webhook per-perangkat dengan mudah.
+Sistem akan mengirimkan HTTP POST ke URL yang Anda daftarkan segera setelah kejadian terjadi.
 
-## Struktur Database
+```mermaid
+graph LR
+    A[WhatsApp Event] --> B[WA Gateway]
+    B --> C{Webhook Aktif?}
+    C -- Ya --> D[Kirim POST Request]
+    D --> E[Server Anda]
+    E -- Respon 200 OK --> F[Selesai]
+```
 
-Model Prisma yang terlibat:
+---
 
-- `Webhook`: Menyimpan URL endpoint, status aktif, dan secret key.
-- Relasi: Satu `Device` hanya bisa memiliki satu `Webhook` aktif.
+## ✨ Fitur Utama
 
-## Alur Sistem Backend (`webhookController.ts` & `sessionManager.ts`)
+-   **Pesan Masuk**: Terima isi pesan, nomor pengirim, dan metadata lainnya.
+-   **Security Secret**: Gunakan `X-Webhook-Secret` di header untuk memverifikasi bahwa request benar-benar berasal dari gateway ini.
+-   **Toggle Per-Device**: Setiap perangkat dapat memiliki URL webhook yang berbeda-beda.
 
-1. **Incoming Event**: `sessionManager` mendeteksi pesan baru atau perubahan status pesan.
-2. **Detection**: Sistem mengecek apakah ada `Webhook` yang aktif untuk `deviceId` terkait.
-3. **Dispatch**: Jika ada, sistem mengirimkan payload JSON ke URL yang terdaftar menggunakan metode POST.
-4. **Retry Logic**: (Opsional) Jika endpoint target gagal (HTTP != 200), sistem dapat mencoba mengirim ulang beberapa kali sebelum menyerah.
+---
 
-## Contoh Payload Webhook
+## 📝 Contoh Payload (Pesan Masuk)
+
+Sistem akan mengirimkan JSON dengan struktur berikut:
 
 ```json
 {
@@ -36,6 +41,12 @@ Model Prisma yang terlibat:
 }
 ```
 
-## Keamanan
+---
 
-Disarankan bagi pengembang pihak ketiga untuk selalu memverifikasi `X-Webhook-Secret` pada header HTTP mereka untuk memastikan integritas data.
+## 🛡️ Keamanan (X-Webhook-Secret)
+
+Untuk memastikan request yang masuk ke server Anda adalah valid, pastikan untuk memverifikasi header `X-Webhook-Secret`. Nilai secret ini dapat Anda temukan pada halaman pengaturan webhook di dashboard.
+
+---
+
+[🏠 Home](../README.md) | [📱 Manajemen Device](DEVICES.md) | [🔌 Referensi API](../API.md)

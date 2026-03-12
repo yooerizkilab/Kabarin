@@ -12,16 +12,17 @@ Sebelum memulai instalasi, pastikan sistem Anda memiliki:
 
 ---
 
-## � Dokumentasi
+## 📖 Dokumentasi Lengkap
 
-Untuk detail lebih lanjut mengenai penggunaan dan konfigurasi, silakan merujuk pada dokumen berikut:
+Kami telah menyediakan panduan lengkap yang terorganisir untuk membantu Anda memulai:
 
-- [🚀 **Instalasi**](docs/INSTALLATION.md) - Cara setup project dari awal.
-- [⚙️ **Konfigurasi**](docs/CONFIGURATION.md) - Detail pengaturan environment variable.
-- [▶️ **Cara Menjalankan**](docs/RUNNING.md) - Instruksi untuk menjalankan backend, worker, dan frontend.
-- [📖 **Panduan Penggunaan**](docs/USAGE.md) - Cara login, koneksi device, dan format CSV.
-- [🔌 **Dokumentasi API**](docs/API.md) - Referensi REST API dan WebSocket.
-- [🔮 **Roadmap**](docs/ROADMAP.md) - Rencana pengembangan fitur di masa depan.
+👉 **[Buka Dokumentasi Utama (docs/README.md)](docs/README.md)**
+
+Di sana Anda akan menemukan:
+- [🚀 **Panduan Instalasi**](docs/INSTALLATION.md)
+- [⚙️ **Konfigurasi Environment**](docs/CONFIGURATION.md)
+- [🔌 **Referensi API & Webhooks**](docs/API.md)
+- [🛠️ **Detail Fitur (Auto-Responder, Blast, dll)**](docs/README.md#fitur-unggulan)
 
 ---
 

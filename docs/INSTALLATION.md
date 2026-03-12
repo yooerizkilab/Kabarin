@@ -1,64 +1,89 @@
-# Instalasi WhatsApp Gateway
+# 🚀 Panduan Instalasi
 
-Ikuti langkah-langkah berikut untuk menginstal project ini di lingkungan lokal Anda.
+Ikuti langkah-langkah di bawah ini untuk menyiapkan WhatsApp Gateway di mesin lokal atau server Anda.
 
-## 📋 Prasyarat Sistem
+## 📋 Prasyarat
 
-Sebelum memulai instalasi, pastikan sistem Anda memiliki:
-
-- Node.js (versi 20 atau lebih baru)
-- MySQL / MariaDB (minimal versi 8.0)
-- Git (jika ingin clone dari repositori)
+Pastikan perangkat Anda sudah terpasang:
+- **Node.js**: v20.x atau lebih baru.
+- **MySQL/MariaDB**: v8.0+ atau v10.4+.
+- **Git**: Untuk manajemen versi.
+- **OS**: Windows, macOS, atau Linux (Ubuntu/Debian direkomendasikan).
 
 ---
 
-## 🚀 Cara Instalasi (Jika Clone dari GitHub)
+## 🛠️ Langkah-Langkah Instalasi
 
-Ikuti langkah-langkah berikut jika Anda baru saja melakukan _clone_ project ini dari GitHub.
-
-### 1. Clone Repositori
-
+### 1. Persiapan Repositori
+Clone repositori dan masuk ke direktori utama:
 ```bash
-git clone <url-repositori-github>
+git clone <url-repositori>
 cd whatsapp-gateway
 ```
 
-### 2. Setup Database
-
-Buat database baru di MySQL dengan nama `whatsapp_gateway` (atau nama lain sesuai keinginan Anda).
-
-### 3. Instalasi Backend & Konfigurasi
-
+### 2. Konfigurasi Backend
+Masuk ke folder backend dan instal dependensi:
 ```bash
 cd backend
-
-# Install semua dependensi
 npm install
+```
 
-# Copass .env dan sesuaikan dengan database Anda
-# (Pastikan MySQL sudah berjalan dan kredensialnya benar)
+Salin file contoh environment dan sesuaikan:
+```bash
 cp .env.example .env
+```
+> [!NOTE] 
+> Edit `.env` dan pastikan `DATABASE_URL` sesuai dengan kredensial MySQL Anda (User, Password, Host, Port, dan Nama Database).
 
-# Jalankan migrasi database (Membuat tabel-tabel di MySQL)
+### 3. Inisialisasi Database
+Jalankan perintah berikut untuk membuat skema tabel dan data awal:
+```bash
+# Membuat tabel baru
 npx prisma migrate dev --name init
 
-# Generate Prisma Client (Wajib dijalankan setelah migrasi)
+# Generate Prisma Client
 npx prisma generate
 
-# Jalankan seeder (Untuk membuat akun Admin bawaan)
+# Mengisi data awal (Admin & Plans)
 npm run prisma:seed
 ```
 
-### 4. Instalasi Frontend & Konfigurasi
-
-Buka terminal/tab baru dan masuk ke folder frontend.
-
+### 4. Konfigurasi Frontend
+Buka terminal baru, masuk ke folder frontend, dan instal dependensi:
 ```bash
 cd frontend
-
-# Install dependensi frontend
 npm install
-
-# Buat file env (untuk menyambungkan frontend ke backend)
 cp .env.example .env.local
 ```
+
+---
+
+## 🏗️ Menjalankan Aplikasi
+
+Pastikan MySQL Anda sudah aktif, lalu jalankan perintah berikut:
+
+**Backend:**
+```bash
+cd backend
+npm run dev
+```
+
+**Frontend:**
+```bash
+cd frontend
+npm run dev
+```
+
+Akses aplikasi di: `http://localhost:3000`
+
+---
+
+## ❓ Masalah Umum (Troubleshooting)
+
+- **EPERM / File Locked**: Pastikan server backend sedang tidak berjalan saat menjalankan `npx prisma generate`.
+- **MySQL Connection Error**: Pastikan user MySQL memiliki hak akses penuh ke database `whatsapp_gateway`.
+- **QR Code tidak muncul**: Periksa log backend, pastikan folder `./sessions` memiliki izin tulis (write permission).
+
+---
+
+[🏠 Kembali ke Home](README.md) | [⚙️ Lanjut ke Konfigurasi](CONFIGURATION.md)
