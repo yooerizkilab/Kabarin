@@ -11,8 +11,7 @@
     "worker:message": "tsx watch src/workers/messageWorker.ts",
     "prisma:migrate": "prisma migrate dev",
     "prisma:generate": "prisma generate",
-    "prisma:studio": "prisma studio",
-    "prisma:seed": "tsx prisma/seed.ts"
+    "prisma:seed": "npx -y tsx prisma/seed.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.78.0",
@@ -57,6 +56,6 @@
     "typescript": "^5.4.5"
   },
   "prisma": {
-    "seed": "tsx prisma/seed.ts"
+    "seed": "npx -y tsx prisma/seed.ts"
   }
 }
