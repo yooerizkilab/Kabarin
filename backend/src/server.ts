@@ -12,6 +12,7 @@ import { authenticate } from './middlewares/auth';
 import rateLimit from '@fastify/rate-limit';
 import { redisConnection } from './config/redis';
 import compression from '@fastify/compress';
+import metrics from 'fastify-metrics';
 import { authRoutes } from './routes/auth.routes';
 import { deviceRoutes } from './routes/device.routes';
 import { messageRoutes } from './routes/message.routes';
@@ -47,6 +48,8 @@ async function buildServer() {
     });
 
     await fastify.register(compression);
+
+    await fastify.register(metrics, { endpoint: '/metrics' });
 
     await fastify.register(jwt, { secret: env.JWT_SECRET });
 

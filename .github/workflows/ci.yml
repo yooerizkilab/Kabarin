@@ -1,0 +1,45 @@
+name: CI - Build Test
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  build-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: './backend/package-lock.json'
+      - name: Install Dependencies
+        run: npm install --legacy-peer-deps
+        working-directory: ./backend
+      - name: Prisma Generate
+        run: npx prisma generate
+        working-directory: ./backend
+      - name: Build
+        run: npm run build
+        working-directory: ./backend
+
+  build-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: './frontend/package-lock.json'
+      - name: Install Dependencies
+        run: npm install
+        working-directory: ./frontend
+      - name: Build
+        run: npm run build
+        working-directory: ./frontend

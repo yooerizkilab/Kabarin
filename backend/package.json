@@ -34,6 +34,7 @@
     "date-fns": "^4.1.0",
     "dotenv": "^16.4.5",
     "fastify": "^4.28.1",
+    "fastify-metrics": "^13.2.0",
     "html-to-text": "^9.0.5",
     "ioredis": "^5.10.0",
     "libphonenumber-js": "^1.12.38",
